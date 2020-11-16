@@ -1,0 +1,41 @@
+{
+  "name": "tidal-tui",
+  "version": "0.1.0",
+  "description": "FIXME",
+  "main": "target/main.js",
+  "author": "FIXME <FIXME@FIXME.com>",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/FIXME/tidal-tui"
+  },
+  "directories": {
+    "bin": "bin",
+    "doc": "docs",
+    "lib": "lib",
+    "src": "src"
+  },
+  "bin": {
+    "tidal-tui": "bin/tidal-tui"
+  },
+  "scripts": {
+    "build": "./scripts/build",
+    "init": "npm install && npx shadow-cljs watch app",
+    "repl": "npx shadow-cljs cljs-repl app",
+    "start": "npx shadow-cljs watch app",
+    "test": "npx shadow-cljs compile test"
+  },
+  "dependencies": {
+    "blessed": "^0.1.81",
+    "react-blessed": "^0.5.0",
+    "react": "^16.7.0",
+    "react-dom": "^16.7.0",
+    "create-react-class": "^15.6.3"
+  },
+  "devDependencies": {
+    "loose-envify": "^1.4.0",
+    "ws": "^6.1.2",
+    "shadow-cljs": "^2.7.24",
+    "source-map-support": "^0.5.10"
+  }
+}
