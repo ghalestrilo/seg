@@ -18,6 +18,7 @@
   binding keys.
   https://github.com/chjj/blessed#screen-from-node"
   :start
+  
   (doto
     (.screen blessed
              #js {:autoPadding true

@@ -50,6 +50,18 @@
            :content (->> (take-last (log-height rows) @logger)
                          (join "\n"))}]])
 
+(comment
+(defn help-box
+  "Displays helpful contextual information based on screen, action,
+  state and plugin info"
+  []
+   [:box {:width   "48%"
+          :top 1
+          :left 1
+          :bottom 1
+          :content ["Hello"]}])
+)
+
 (defn debug-box
   "Displays both the current state and last several lines of output.
   Takes number of rows representing the total screen height.

@@ -12,7 +12,7 @@
   :init
   (fn [db [_ opts terminal-size]]
     {:opts opts
-     :router/view :loader
+     :router/view :session
      :terminal/size terminal-size}))
 
 (rf/reg-event-db
@@ -24,3 +24,17 @@
   :set
   (fn [db [_ data]]
     data))
+
+
+; TODO: Remove this / replace with:
+; 1. Receive arg (command line)
+; 2. Read file, fill 
+; Future improvements:
+; Tidal should be a plugin, offering regexes for its players + patterns
+; Support for additional user regexes for finding players + patterns
+(rf/reg-event-db
+  :read-file
+  (fn [db [_]]
+    (merge db {:track/players
+      [{:name "1" :patterns []}
+       {:name "2" :patterns []}]})))

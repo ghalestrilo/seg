@@ -7,7 +7,6 @@
    [re-frame.core :as rf]
    [reagent.core :as r]
    [tidal-tui.core :refer [render screen]]
-   [tidal-tui.demo.views :refer [demo]]
    [tidal-tui.events]
    [tidal-tui.resize :refer [size]]
    [tidal-tui.subs]
@@ -16,10 +15,10 @@
 (defn ui
   "Root ui view.
   Takes no arguments.
-  Returns hiccup demo element to run the demo app."
+  Returns hiccup base element to run the base app."
   [_]
   (let [view @(rf/subscribe [:view])]
-    [demo {:view view}]))
+    [views/base {:view view}]))
 
 (def cli-options
   [["-p" "--port PORT" "port number"
@@ -46,6 +45,7 @@
   [view & {:keys [opts]}]
   (mount/start)
   (rf/dispatch-sync [:init (:options opts) (size @screen)])
+  (rf/dispatch-sync [:read-file])
   (-> (r/reactify-component view)
       (r/create-element #js {})
       (render @screen)))

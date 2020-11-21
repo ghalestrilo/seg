@@ -4,16 +4,16 @@
    [reagent.core :as r]
    [tidal-tui.core :refer [render screen]]
    [tidal-tui.debug.views :as debug]
-   [tidal-tui.demo.views :refer [demo]]
+   [tidal-tui.views :refer [base]]
    [tidal-tui.main :as main]))
 
 (defn ui
-  "Basic wrapper to show the demo app and the debug view half height.
+  "Basic wrapper to show the base app and the debug view half height.
   Returns hiccup vector."
   [_]
   (let [view @(rf/subscribe [:view])
         rows (:rows @(rf/subscribe [:size]))]
-    [demo
+    [base
      {:view view}
      [debug/debug-box rows]]))
 
