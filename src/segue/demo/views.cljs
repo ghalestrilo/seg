@@ -26,32 +26,61 @@
                    :fg :black
                    :on-select #(rf/dispatch [:update {:router/view %}])}]])
 
-(defn home
-  "Display welcome message and general usage info to user.
-  Returns hiccup :box element."
+
+
+; TDDO: Move to Components
+(defn player
+  [& player-info]
+  (let [
+        ; {:keys [name patterns]} player-info
+        ; patlist (or patterns [])
+        ; patlist (-> player-info :patterns (or []))
+        ; name (-> player-info :name (or "test"))
+        ; patlist (:patlist player-info)
+        ; patlist (:name player-info)
+        name "haha"
+        patlist []
+        ]
+  [:box
+    {:top 0
+    :left 0
+    :width 12
+    :height "100%"
+    :label (or name "Player1")
+    }
+    (vertical-menu
+      {:on-select #()
+       ; :options (zipmap (-> patlist (count) (range)) patlist)
+       :options patlist
+       })]))
+
+
+(defn session
+  "The main session view"
   [_]
-  [:box#home
+  ; (let [players @(rf/subscribe [:track/players])]
+  (let [players [{ :name "1" :patterns [ "0 0 0*2 0" ]}]]
+  [:box#session
    {:top 0
     :right 0
     :width "70%"
     :height "50%"
     :style {:border {:fg :magenta}}
     :border {:type :line}
-    :label " Intro "}
+    :label " Session "}
+    (for [player players]
+    
    [:box#content
     {:top 1
      :left 1
-     :right 1}
-    [:box
-     {:align :center
-      :style {:fg :yellow}
-      :content "Welcome, you are successfully running the app.\nHappy hacking!"}]
-    [:box#keys
-     {:top 5
-      :left 2
-      :right 2
-      :align :left
-      :content "Usage:\n\n  - j/k or up/down to select a page\n  - enter or l to view page"}]]])
+     :right 1
+     :label (:name (nth players 0))
+     }
+     ;FIXME: This line breaks
+      ; [:player {}]
+      ]
+    )
+      ]))
 
 (defn terminal-view
   [_]
@@ -118,6 +147,6 @@
               :height "100%"}
    (when (not= view :loader) [navbar])
    [router {:views {:terminal terminal-view
-                    :home home}
+                    :home session}
             :view view}]
    child])
