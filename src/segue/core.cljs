@@ -22,6 +22,10 @@
     (.screen blessed
              #js {:autoPadding true
                   :smartCSR true
+                  :log (str js/process.env.HOME "/cljs-blessed-terminal.log")
+                  :fullUnicode true
+                  :dockBorders true
+                  :ignoreDockContrast true
                   :title "segue"})
     resize/setup
     keys/setup))

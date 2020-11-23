@@ -12,7 +12,7 @@
   :init
   (fn [db [_ opts terminal-size]]
     {:opts opts
-     :router/view :loader
+     :router/view :home
      :terminal/size terminal-size}))
 
 (rf/reg-event-db
