@@ -1,5 +1,5 @@
 {
-  "name": "tidal-tui",
+  "name": "segue",
   "version": "0.1.0",
   "description": "FIXME",
   "main": "target/main.js",
@@ -7,7 +7,7 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/FIXME/tidal-tui"
+    "url": "https://github.com/FIXME/segue"
   },
   "directories": {
     "bin": "bin",
@@ -16,22 +16,23 @@
     "src": "src"
   },
   "bin": {
-    "tidal-tui": "bin/tidal-tui"
+    "segue": "bin/segue"
   },
   "scripts": {
     "build": "./scripts/build",
     "init": "npm install && npx shadow-cljs watch app",
     "repl": "npx shadow-cljs cljs-repl app",
     "start": "npx shadow-cljs watch app",
-    "test": "npx shadow-cljs compile test",
-    "inspect": "node --inspect target/js/compiled/tidal-tui.js"
+    "test": "npx shadow-cljs compile test"
   },
   "dependencies": {
     "blessed": "^0.1.81",
-    "react-blessed": "^0.5.0",
+    "create-react-class": "^15.6.3",
+    "node-pty": "^0.9.0",
     "react": "^16.7.0",
+    "react-blessed": "^0.5.0",
     "react-dom": "^16.7.0",
-    "create-react-class": "^15.6.3"
+    "term.js": "0.0.7"
   },
   "devDependencies": {
     "loose-envify": "^1.4.0",

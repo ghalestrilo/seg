@@ -1,3 +1,3 @@
-# Introduction to tidal-tui
+# Introduction to segue
 
 TODO: write [great documentation](http://jacobian.org/writing/what-to-write/)

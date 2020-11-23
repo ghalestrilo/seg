@@ -10,11 +10,11 @@
  :builds {:app {:output-to  "target/main.js"
                 :output-dir "target/js/compiled/prod"
                 :target     :node-script
-                :devtools   {:after-load       tidal-tui.app/reload!}
-                :dev        {:main             tidal-tui.app/main!
-                             :output-to        "target/js/compiled/tidal-tui.js"
+                :devtools   {:after-load       segue.app/reload!}
+                :dev        {:main             segue.app/main!
+                             :output-to        "target/js/compiled/segue.js"
                              :output-dir       "target/js/compiled/dev"}
-                :release    {:main             tidal-tui.main/main!
+                :release    {:main             segue.main/main!
                              :compiler-options {:optimizations :simple}}}
           :test {:output-to "target/test.js"
                  :output-dir "target/js/compiled/test"

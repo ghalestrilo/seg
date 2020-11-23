@@ -1,10 +1,10 @@
-(ns tidal-tui.core
+(ns segue.core
   "Create application state with mount."
   (:require
    [cljs.nodejs :as nodejs]
    [mount.core :refer [defstate] :as mount]
-   [tidal-tui.keys :as keys]
-   [tidal-tui.resize :as resize]))
+   [segue.keys :as keys]
+   [segue.resize :as resize]))
 
 ;; Import required npm & node dependencies
 (def blessed (js/require "blessed"))
@@ -18,12 +18,15 @@
   binding keys.
   https://github.com/chjj/blessed#screen-from-node"
   :start
-  
   (doto
     (.screen blessed
              #js {:autoPadding true
                   :smartCSR true
-                  :title "tidal-tui"})
+                  :log (str js/process.env.HOME "/cljs-blessed-terminal.log")
+                  :fullUnicode true
+                  :dockBorders true
+                  :ignoreDockContrast true
+                  :title "segue"})
     resize/setup
     keys/setup))
 
