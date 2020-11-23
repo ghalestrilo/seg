@@ -30,61 +30,45 @@
 
 ; TDDO: Move to Components
 (defn player
-  [& player-info]
-  (let [
-        ; {:keys [name patterns]} player-info
-        ; patlist (or patterns [])
-        ; patlist (-> player-info :patterns (or []))
-        ; name (-> player-info :name (or "test"))
-        ; patlist (:patlist player-info)
-        ; patlist (:name player-info)
-        name "haha"
-        patlist []
-        ]
+  [{:keys [name patterns]}]
   [:box
     {:top 0
-    :left 0
     :width 12
     :height "100%"
-    :label (or name "Player1")
+    :label (or name "??")
     }
-    (vertical-menu
-      {:on-select #()
-       ; :options (zipmap (-> patlist (count) (range)) patlist)
-       :options patlist
-       })]))
+    (for [pattern (or patterns [])]
+      [:text (str pattern "\n")]
+      )])
 
+; (vertical-menu
+;         {:on-select #()
+;           ; :options (zipmap (-> patlist (count) (range)) patlist)
+;           :options patlist
+;           })
 
 (defn session
   "The main session view"
   [_]
-  ; (let [players @(rf/subscribe [:track/players])]
-  (let [players [{ :name "1" :patterns [ "0 0 0*2 0" ]}]]
-  [:box#session
-   {:top 0
-    :right 0
-    :width "70%"
-    :height "50%"
-    :style {:border {:fg :magenta}}
-    :border {:type :line}
-    :label " Session "}
-    (for [player players]
-    
-   [:box#content
-    {:top 1
-     :left 1
-     :right 1
-     :label (:name (nth players 0))
-     }
-     ;FIXME: This line breaks
-      ; [:player {}]
-      ]
-    )
-      ]))
+  (let [; players @(rf/subscribe [:track/players]) ; FIXME: Missing db sub
+        ]
+    (let [players [{ :name "p1" :patterns [ "0 0 0*2 0" ]}
+                   { :name "p2" :patterns [ "0(3,8)" "0 0"]}]]
+      [:box#session
+        { :right 0
+          :width "70%"
+          :height "50%"
+          ;:left 0
+          ;:width "100%"
+          ;:height "100%"
+          :top 0
+          :style {:border {:fg :magenta}}
+          :border {:type :line}
+          :label " Session "}
+        (for [player-info players]
+          [player player-info]
+            )])))
 
-(defn terminal-view
-  [_]
-  [:box {} "haha"])
 
 (comment 
 (defn loader
