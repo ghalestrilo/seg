@@ -26,26 +26,11 @@
                    :fg :black
                    :on-select #(rf/dispatch [:update {:router/view %}])}]])
 
-
-
-; TDDO: Move to Components
-(defn player
+(defn get-player-rows
   [{:keys [name patterns]}]
-  [:list
-    {
-    :width 12
-    :height "100%"
-    :label (or name "??")
-    :items (or patterns [])
-    }
-      ])
+  (concat [name] patterns))
 
-; (vertical-menu
-;         {:on-select #()
-;           ; :options (zipmap (-> patlist (count) (range)) patlist)
-;           :options patlist
-;           })
-
+; TODO: Use Layout
 (defn session
   "The main session view"
   [_]
@@ -53,21 +38,31 @@
         ]
     (let [players [{ :name "p1" :patterns [ "0 0 0*2 0" ]}
                    { :name "p2" :patterns [ "0(3,8)" "0 0"]}]]
-      [:listbar#session
-        { :right 0
-          ;:width "70%"
-          ;:height "50%"
-          ;:left 0
-          :width "100%"
-          :height "100%"
-          :top 0
+      [:box
+        { :top 0
           :style {:border {:fg :magenta}}
           :border {:type :line}
           :label " Session "
-          :items (map :name players)
+          :right 0
+          :width "100%"
+          :height "100%"
+        }
+      
+        [:listtable#session
+          { :data (map get-player-rows players)
+            :right 1
+            :left 1
+            :align :left
+            :width "100%"
+            :height "100%"
+            :style {:header   { :fg :magenta }
+                    :selected { :bg :magenta :fg :black  :width 12}
+                    :item     { :width 12 } }
           }
-          ; (for [player-info players] [player player-info])
-        ])))
+          ]
+        ]
+        )))
+
 
 
 (comment 
