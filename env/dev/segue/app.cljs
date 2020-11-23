@@ -7,34 +7,34 @@
    [segue.demo.views :refer [demo]]
    [segue.main :as main]))
 
-; (defn ui
-;   "Basic wrapper to show the demo app and the debug view half height.
-;   Returns hiccup vector."
-;   [_]
-;   (let [view @(rf/subscribe [:view])
-;         rows (:rows @(rf/subscribe [:size]))]
-;     [demo
-;      {:view view}
-;      [debug/debug-box rows]]))
-
 (defn ui
   "Basic wrapper to show the demo app and the debug view half height.
   Returns hiccup vector."
   [_]
-  [:terminal
-   {:parent @screen
-    :cursor "line"
-    :cursorBlink true
-    :screenKeys false
-    :label " multiplex.js "
-    :left 0
-    :right 0
-    :width  "100%"
-    :height "100%"
-    :border "line"
-    :style {:fg "default"
-            :bg "default"
-            :focus {:border {:fg "green"}}}}])
+  (let [view @(rf/subscribe [:view])
+        rows (:rows @(rf/subscribe [:size]))]
+    [demo
+     {:view view}
+     [debug/debug-box rows]]))
+
+;(defn ui
+;  "Basic wrapper to show the demo app and the debug view half height.
+;  Returns hiccup vector."
+;  [_]
+;  [:terminal
+;   {:parent @screen
+;    :cursor "line"
+;    :cursorBlink true
+;    :screenKeys false
+;    :label " multiplex.js "
+;    :left 0
+;    :right 0
+;    :width  "100%"
+;    :height "100%"
+;    :border "line"
+;    :style {:fg "default"
+;            :bg "default"
+;            :focus {:border {:fg "green"}}}}])
 
 
 (defn main!

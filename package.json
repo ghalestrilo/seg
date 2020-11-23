@@ -27,10 +27,12 @@
   },
   "dependencies": {
     "blessed": "^0.1.81",
-    "react-blessed": "^0.5.0",
+    "create-react-class": "^15.6.3",
+    "node-pty": "^0.9.0",
     "react": "^16.7.0",
+    "react-blessed": "^0.5.0",
     "react-dom": "^16.7.0",
-    "create-react-class": "^15.6.3"
+    "term.js": "0.0.7"
   },
   "devDependencies": {
     "loose-envify": "^1.4.0",
