@@ -1,19 +1,19 @@
-(ns tidal-tui.app
+(ns segue.app
   (:require
    [re-frame.core :as rf]
    [reagent.core :as r]
-   [tidal-tui.core :refer [render screen]]
-   [tidal-tui.debug.views :as debug]
-   [tidal-tui.views :refer [base]]
-   [tidal-tui.main :as main]))
+   [segue.core :refer [render screen]]
+   [segue.debug.views :as debug]
+   [segue.demo.views :refer [demo]]
+   [segue.main :as main]))
 
 (defn ui
-  "Basic wrapper to show the base app and the debug view half height.
+  "Basic wrapper to show the demo app and the debug view half height.
   Returns hiccup vector."
   [_]
   (let [view @(rf/subscribe [:view])
         rows (:rows @(rf/subscribe [:size]))]
-    [base
+    [demo
      {:view view}
      [debug/debug-box rows]]))
 

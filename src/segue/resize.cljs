@@ -1,4 +1,4 @@
-(ns tidal-tui.resize
+(ns segue.resize
   (:require
    [re-frame.core :as rf]))
 

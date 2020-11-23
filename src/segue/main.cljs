@@ -1,4 +1,4 @@
-(ns tidal-tui.main
+(ns segue.main
   "Main application entrypoint. Defines root UI view, cli-options,
   arg parsing logic, and initialization routine"
   (:require
@@ -6,19 +6,20 @@
    [mount.core :refer [defstate] :as mount]
    [re-frame.core :as rf]
    [reagent.core :as r]
-   [tidal-tui.core :refer [render screen]]
-   [tidal-tui.events]
-   [tidal-tui.resize :refer [size]]
-   [tidal-tui.subs]
-   [tidal-tui.views :as views]))
+   [segue.core :refer [render screen]]
+   [segue.demo.views :refer [demo]]
+   [segue.events]
+   [segue.resize :refer [size]]
+   [segue.subs]
+   [segue.views :as views]))
 
 (defn ui
   "Root ui view.
   Takes no arguments.
-  Returns hiccup base element to run the base app."
+  Returns hiccup demo element to run the demo app."
   [_]
   (let [view @(rf/subscribe [:view])]
-    [views/base {:view view}]))
+    [demo {:view view}]))
 
 (def cli-options
   [["-p" "--port PORT" "port number"
@@ -45,7 +46,6 @@
   [view & {:keys [opts]}]
   (mount/start)
   (rf/dispatch-sync [:init (:options opts) (size @screen)])
-  (rf/dispatch-sync [:read-file])
   (-> (r/reactify-component view)
       (r/create-element #js {})
       (render @screen)))

@@ -1,4 +1,4 @@
-# tidal-tui
+# segue
 A ClojureScript TUI to ...
 
 ## Installation
