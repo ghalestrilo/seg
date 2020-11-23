@@ -31,15 +31,14 @@
 ; TDDO: Move to Components
 (defn player
   [{:keys [name patterns]}]
-  [:box
-    {:top 0
+  [:list
+    {
     :width 12
     :height "100%"
     :label (or name "??")
+    :items (or patterns [])
     }
-    (for [pattern (or patterns [])]
-      [:text (str pattern "\n")]
-      )])
+      ])
 
 ; (vertical-menu
 ;         {:on-select #()
@@ -54,20 +53,21 @@
         ]
     (let [players [{ :name "p1" :patterns [ "0 0 0*2 0" ]}
                    { :name "p2" :patterns [ "0(3,8)" "0 0"]}]]
-      [:box#session
+      [:listbar#session
         { :right 0
-          :width "70%"
-          :height "50%"
+          ;:width "70%"
+          ;:height "50%"
           ;:left 0
-          ;:width "100%"
-          ;:height "100%"
+          :width "100%"
+          :height "100%"
           :top 0
           :style {:border {:fg :magenta}}
           :border {:type :line}
-          :label " Session "}
-        (for [player-info players]
-          [player player-info]
-            )])))
+          :label " Session "
+          :items (map :name players)
+          }
+          ; (for [player-info players] [player player-info])
+        ])))
 
 
 (comment 
