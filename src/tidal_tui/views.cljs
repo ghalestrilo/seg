@@ -127,9 +127,36 @@
                    :on-select #(rf/dispatch [:update {:router/view %}])}]])
 
 
+; TDDO: Move to Components
+(defn player
+  [& player-info]
+  (let [
+        ; {:keys [name patterns]} player-info
+        ; patlist (or patterns [])
+        ; patlist (-> player-info :patterns (or []))
+        ; name (-> player-info :name (or "test"))
+        patlist []
+        name "Teste"
+        ]
+  [:box
+    {:top 0
+    :left 0
+    :width 12
+    :height "100%"
+    :label (or name "Player1")
+    }
+    (vertical-menu
+      {:on-select #()
+       ; :options (zipmap (-> patlist (count) (range)) patlist)
+       :options [{:t1 "teste"}]
+       })]))
+
+
+
 (defn session
   "The main session view"
   [_]
+  (let [players @(rf/subscribe [:track/players])]
   [:box#session
    {:top 0
     :right 0
@@ -142,17 +169,16 @@
     {:top 1
      :left 1
      :right 1}
-     
-    ]])
+      (-> players (nth 0) (player)) ]]))
 
-(def blessed (js/require "blessed"))
+Q(def blessed (js/require "blessed"))
 (defn blessed-terminal
   []
   (.terminal blessed (clj->js {})))
 
 (defn module
   [_]
-  [:box#session
+  [:box#module
    {:top 0
     :right 0
     :width "70%"
@@ -222,7 +248,7 @@
               :height "100%"}
    (when (not= view :loader) [navbar])
    [router {:views {:session session
-                    :module module
+                    :module  module
                     }
             :view view}]
    child])

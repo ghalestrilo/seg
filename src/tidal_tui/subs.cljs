@@ -17,3 +17,8 @@
   :size
   (fn [db _]
     (:terminal/size db)))
+
+(rf/reg-sub
+  :track
+  (fn [db _]
+    (:track db)))
