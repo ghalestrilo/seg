@@ -34,12 +34,12 @@
     (println options)
     [vertical-menu {:options options
                     :on-select #(rf/dispatch [:update {:router/view %}])
-                    :label name
                     :fg :black
                     :bg :magenta
-                    :scrollable true 
-                    :border {:type :line}
-                    :style {:border {:fg :magenta}}}]))
+                    :box {:scrollable true 
+                          :label name
+                          :border {:type :none}
+                          :style {:border {:fg :magenta}}}}]))
 
 (let [loops (->> patterns (count) (range 0)) options (zipmap (->> loops (map str) (map keyword)) loops)] options)
 
