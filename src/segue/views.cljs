@@ -81,8 +81,8 @@
               :c \"Item C\"}})"
   [{:keys [bg box default fg on-select options]}]
   (r/with-let [selected (r/atom (or default (->> options first key)))]
-    (with-keys @screen {["j" "down"] #(swap! selected next-option options)
-                        ["k" "up"] #(swap! selected prev-option options)
+    (with-keys @screen {["j" "down"]  #(swap! selected next-option options)
+                        ["k" "up"]    #(swap! selected prev-option options)
                         ["l" "enter"] #(on-select @selected)}
       (let [current @selected]
         [:box#menu

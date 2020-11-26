@@ -28,15 +28,25 @@
 
 (defn player-column
   [{:keys [name patterns]}]
-  [:radioset 
-    (for [pattern patterns]
-     [:radiobutton pattern])])
+  (let [loops (->> patterns (count) (range 0) (map #(str "pat" %)))
+        dakeys (->> loops (map keyword))
+        options (zipmap dakeys loops)]
+    (println options)
+    [vertical-menu {:options options
+                    :on-select #(rf/dispatch [:update {:router/view %}])
+                    :label name
+                    :fg :black
+                    :bg :magenta
+                    :scrollable true 
+                    :border {:type :line}
+                    :style {:border {:fg :magenta}}}]))
 
+(let [loops (->> patterns (count) (range 0)) options (zipmap (->> loops (map str) (map keyword)) loops)] options)
 
 (defn session
   [_]
  (let [players [{ :name "p1" :patterns [ "0 0 0*2 0"]}
-                { :name "p2" :patterns [ "0(3,8)" "0 0"]}]]
+                { :name "p2" :patterns [ "0(3,8)" "0 0" "0*4" "degrade 8 $ \"0 0\""]}]]
       [:box {:top 0
              :style {:border {:fg :magenta}}
              :border {:type :line}
@@ -44,88 +54,9 @@
              :right 0
              :width "100%"
              :height "100%"}
-            (for [player players]
-             [player-column player])]))
+            [player-column (nth players 1)]]))
        ;[:listbar { :items players}]
        
-       
-       
-      
-                
-               
-
-; TODO: Use Layout
-;(defn session
-;  "The main session view"
-;  [_]
-;  (let []; players @(rf/subscribe [:track/players]) ; FIXME: Missing db sub
-;        
-;    (let [players [{ :name "p1" :patterns [ "0 0 0*2 0"]}
-;                   { :name "p2" :patterns [ "0(3,8)" "0 0"]}]]
-;      [:box
-;        { :top 0
-;          :style {:border {:fg :magenta}}
-;          :border {:type :line}
-;          :label " Session "
-;          :right 0
-;          :width "100%"
-;          :height "100%"}
-;        
-;      
-;        [:listtable#session
-;          { :data (map get-player-rows players)
-;            :right 1
-;            :left 1
-;            :align :left
-;            :width "100%"
-;            :height "100%"
-;            :style {:header   { :fg :magenta}
-;                    :selected { :bg :magenta :fg :black  :width 12}
-;                    :item     { :width 12}}}]])))
-
-
-
-(comment 
- (defn loader
-   "Shows a mock-loader progress bar for dramatic effect.
-  - Uses with-let to create a progress atom
-  - Uses a js interval to update it every 15 ms until progress is 100.
-  - Starts the timer on each mount.
-  - Navigates to home page when completed.
-  Returns hiccup :box vector."
-   [_]
-   (r/with-let [progress (r/atom 0)
-                interval (js/setInterval #(swap! progress inc) 15)]
-     (when (>= @progress 100)
-       (js/clearInterval interval)
-       (rf/dispatch [:update {:router/view :home}]))
-     [:box#loader
-      {:top 0
-       :width "100%"}
-      [:box
-       {:top 1
-        :width "100%"
-        :align :center
-        :content "Loading Demo"}]
-      [:box
-       {:top 2
-        :width "100%"
-        :align :center
-        :style {:fg :gray}
-        :content "Slow reveal for dramatic effect..."}]
-      [:progressbar
-       {:orientation :horizontal
-        :style {:bar {:bg :magenta}
-                :border {:fg :cyan}
-                :padding 1}
-        :border {:type :line}
-        :filled @progress
-        :left 0
-        :right 0
-        :width "100%"
-        :height 3
-        :top 4
-        :label " progress "}]])))
 
 (defn demo
   "Main demo UI wrapper.
