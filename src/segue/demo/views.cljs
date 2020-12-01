@@ -33,6 +33,7 @@
 
 ; TODO:
 ; move players to global state, bind to session view
+; Document session view
 ; 1. Move help items to global state, render L/R
 ; 2. Create "Selection" Component
 ; 3. Move "selection" to global, make actions update it
