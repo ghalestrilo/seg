@@ -4,7 +4,7 @@
    [clojure.string :refer [join]]
    [re-frame.core :as rf]
    [reagent.core :as r]
-   [segue.views :refer [router vertical-menu horizontal-selector help]]))
+   [segue.views :refer [router vertical-menu player-grid help]]))
 
 (defn navbar
   "Displays a blessed js box with a vertical-menu used for navigation.
@@ -30,12 +30,19 @@
 ;                         ["k" "up"]    #(swap! selected prev-option options)
 ;                         ["l" "enter"] #(on-select @selected)})
 ; (let [loops (->> patterns (count) (range 0)) options (zipmap (->> loops (map str) (map keyword)) loops)] options)
-    
+
+; TODO:
+; move players to global state, bind to session view
+; 1. Move help items to global state, render L/R
+; 2. Create "Selection" Component
+; 3. Move "selection" to global, make actions update it
+; 4. Create list of Sections (grid view)
+
 (defn session
   [_]
  (let [width 10
-       players [{:name "p1" :patterns [ "0 0 0*2 0"]}
-                {:name "p2" :patterns [ "0(3,8)" "0 0" "0*4" "degrade 8 $ \"0 0\""]}]]
+       players [{:name "p1" :def "# s \"supervibe\" # gain 0.8" :patterns [ "0 0 0*2 0"]}
+                {:name "p2" :def "# s \"gretsch\" # gain 0.8" :patterns [ "0(3,8)" "0 0" "0*4" "degrade 8 $ \"0 0\""]}]]
       [:box {:top 0
              :style {:border {:fg :magenta}}
              :border {:type :line}
@@ -43,7 +50,7 @@
              :right 0
              :width "100%"
              :height "100%"}
-            [horizontal-selector {:options players}]])) 
+            [player-grid {:options players}]])) 
         ;[:box {:left 0     :width width} [player-column (merge {:active true}  (nth players 1))]]
         ;[:box {:left width :width width} [player-column (merge {:active false} (nth players 1))]]]))
         

@@ -127,21 +127,25 @@
                           :style {:border {:fg :magenta}
                                   :bold true}}}]))
 
-(defn listmap
-  [items]
-  ())
-
-(defn horizontal-selector
+(defn player-grid
+  "Receives a set of players and renders an interactive grid to control pattern playback
+  
+  Receives a map:
+  
+  Returns a hiccup element"
   [{:keys [bg box default fg options column-width]}]
-  (let [width (or column-width 6)
-        offset 10]
-    [:box {:top 1}
-      [:box [:text "players"]]
-      (for [[idx player] (map-indexed vector options)]
-        [:box { :key idx
-                :left (->> idx (* width) (+ offset))
-                :width width}
-          [:text (:name player)]])]))
+  (r/with-let [selected (r/atom 0)]
+    (with-keys @screen {["h" "left"]  #(swap! selected dec)
+                        ["l" "right"] #(swap! selected inc)}
+      (let [width (or column-width 6)
+            offset 10]
+        [:box {:top 0}
+          [:box [:text "players"]]
+          (for [[idx player] (map-indexed vector options)]
+            [:box { :key idx
+                    :left (->> idx (* width) (+ offset))
+                    :width width}
+              [:text (if (= idx (deref selected)) "me" (:name player))]])]))))
 
 
 (defn help
@@ -161,4 +165,4 @@
           :height "50%"}
     ; for [[idx [value label]] (map-indexed vector options)]
     (for [[idx item] (map-indexed vector items)]
-      [:text {:top idx :left 1} item])])
+      [:text {:key idx :top idx :left 1} item])])
