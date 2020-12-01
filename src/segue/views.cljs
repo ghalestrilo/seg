@@ -99,3 +99,50 @@
                           :fg (when (= value current) (or fg :white))}
                   :height 1
                   :content label}])]))))
+
+
+(defn horizontal-selector
+  "Display an interactive horizontal selector component.
+
+  Takes a hash-map of props:
+  :bg        keyword|str - Background color of highlighted item.
+  :box       hash-map    - Map of props to merge into menu box properties.
+  :default   keyword     - Selected options map keyword key
+  :fg        keyword|str - Text color of highlighted item.
+  :options   hash-map    - Map of keyword keys to item labels
+  :width     integer     - Width of each column
+
+  Returns a reagent hiccup view element."
+  [{:keys [bg box default fg options width]}]
+  (r/with-let [selected (r/atom (or default (->> options first key)))]
+    (with-keys @screen {["l" "right"]  #(swap! selected next-option options)
+                        ["h" "left"]   #(swap! selected prev-option options)}
+      (let [current @selected
+            column-width (or width 10)]
+        [:box#menu
+         (merge
+          {:top 1
+           :left 1
+           :right 1
+           :bottom 1}
+          box)
+         (for [[idx [value label]] (map-indexed vector options)]
+           [:box {:key value
+                  :left (-> idx (* column-width) (+ 1))
+                  :style {:bg (when (= value current) (or bg :green))
+                          :fg (when (= value current) (or fg :white))}
+                  :width column-width
+                  :content label}])]))))
+
+(defn help
+  [{:keys [items]}]
+  [:box { :top 0
+          :style {:border {:fg :magenta}}
+          :border {:type :line}
+          :label " ?? "
+          :right 0
+          :width "25%"
+          :height "50%"}
+    ; for [[idx [value label]] (map-indexed vector options)]
+    (for [[idx item] (map-indexed vector items)]
+      [:text {:top idx :left 1} item])])

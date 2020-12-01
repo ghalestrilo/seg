@@ -4,7 +4,7 @@
    [clojure.string :refer [join]]
    [re-frame.core :as rf]
    [reagent.core :as r]
-   [segue.views :refer [router vertical-menu]]))
+   [segue.views :refer [router vertical-menu horizontal-selector help]]))
 
 (defn navbar
   "Displays a blessed js box with a vertical-menu used for navigation.
@@ -26,14 +26,18 @@
                    :fg :black
                    :on-select #(rf/dispatch [:update {:router/view %}])}]])
 
+
+; (with-keys @screen {["j" "down"]  #(swap! selected next-option options)
+;                         ["k" "up"]    #(swap! selected prev-option options)
+;                         ["l" "enter"] #(on-select @selected)})
+
 (defn player-column
   [{:keys [name patterns]}]
   (let [loops (->> patterns (count) (range 0) (map #(str "pat" %)))
         dakeys (->> loops (map keyword))
         options (zipmap dakeys loops)]
-    (println options)
     [vertical-menu {:options options
-                    :on-select #(rf/dispatch [:update {:router/view %}])
+                    :on-select #(rf/dispatch [:update {:router/view %}]) ; FIXME: Update this callback to display-pattern
                     :fg :black
                     :bg :magenta
                     :box {:scrollable true 
@@ -45,7 +49,8 @@
 
 (defn session
   [_]
- (let [players [{ :name "p1" :patterns [ "0 0 0*2 0"]}
+ (let [width 10
+       players [{ :name "p1" :patterns [ "0 0 0*2 0"]}
                 { :name "p2" :patterns [ "0(3,8)" "0 0" "0*4" "degrade 8 $ \"0 0\""]}]]
       [:box {:top 0
              :style {:border {:fg :magenta}}
@@ -54,9 +59,12 @@
              :right 0
              :width "100%"
              :height "100%"}
-            [player-column (nth players 1)]]))
-       ;[:listbar { :items players}]
-       
+            ; [horizontal-selector { :options [] }] 
+            [:box {:left 0     :width width} [player-column (nth players 1)]]
+            [:box {:left width :width width} [player-column (merge {:bold true} (nth players 1))]]
+        [help {:items [" up/down - choose pattern"
+                       " left/right - choose player"]}]]))
+
 
 (defn demo
   "Main demo UI wrapper.
