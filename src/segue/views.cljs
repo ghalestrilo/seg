@@ -104,7 +104,7 @@
                   :content label}])]))))
             
 
-
+; TODO: Move this
 (def colors
   {:default {:bg :green
              :fg :white}
@@ -143,6 +143,21 @@
                           :fg (when (= value current) (or fg :white))}
                   :width column-width
                   :content label}])]))))
+
+
+(defn listmap
+  [items]
+  ())
+
+(defn horizontal-selector
+  [{:keys [columns default]}]
+  (r/with-let [selected (r/atom (->> 0 (str) (keyword) (or default)))]
+    (with-keys @screen {["l" "right"]  #(swap! selected next-option options)
+                        ["h" "left"]   #(swap! selected prev-option options)})
+    [:box {:top 1}
+      (for [column columns]
+        [:box {:left 0 :width 10} [:text "haha"]])]))
+
 
 (defn help
   "Display a help box on the corner of the screen with contextual usage information

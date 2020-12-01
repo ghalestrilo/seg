@@ -50,13 +50,7 @@
 
 
 ; (let [loops (->> patterns (count) (range 0)) options (zipmap (->> loops (map str) (map keyword)) loops)] options)
-
-(defn horizontal-test
-  [{:keys [columns]}]
-  (for [column columns]
-    [:box {:left 0 :width 10} [player-column column]]))
     
-
 (defn session
   [_]
  (let [width 10
@@ -69,9 +63,10 @@
              :right 0
              :width "100%"
              :height "100%"}
-            ;[horizontal-selector { :options []}]])) 
-        [:box {:left 0     :width width} [player-column (merge {:active true}  (nth players 1))]]
-        [:box {:left width :width width} [player-column (merge {:active false} (nth players 1))]]]))
+            [horizontal-selector {:columns players}]])) 
+        ;[:box {:left 0     :width width} [player-column (merge {:active true}  (nth players 1))]]
+        ;[:box {:left width :width width} [player-column (merge {:active false} (nth players 1))]]]))
+        
         
 
 
@@ -94,8 +89,7 @@
               :height "100%"}
    (when (not= view :loader) [navbar])
    [router {:key "2"
-            :views {:terminal terminal-view
-                    :home session}
+            :views {:home session}
             :view view}]
    [help {:key "1" :items
                       ["up/down - choose pattern"
