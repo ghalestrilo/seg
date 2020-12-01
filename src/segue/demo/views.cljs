@@ -26,36 +26,16 @@
                    :fg :black
                    :on-select #(rf/dispatch [:update {:router/view %}])}]])
 
-
 ; (with-keys @screen {["j" "down"]  #(swap! selected next-option options)
 ;                         ["k" "up"]    #(swap! selected prev-option options)
 ;                         ["l" "enter"] #(on-select @selected)})
-
-(defn player-column
-  [{:keys [name patterns active]}]
-  (let [loops (->> patterns (count) (range 0) (map #(str "pat" %)))
-        dakeys (->> loops (map keyword))
-        options (zipmap dakeys loops)]
-    [vertical-menu {:options options
-                    :active active
-                    :on-select #(rf/dispatch [:update {:router/view %}]) ; FIXME: Update this callback to display-pattern
-                    :fg :black
-                    :bg :magenta
-                    :box {:scrollable true 
-                          :label name
-                          :border {:type :none}
-                          :style {:border {:fg :magenta}
-                                  :bold true}}}]))
-
-
-
 ; (let [loops (->> patterns (count) (range 0)) options (zipmap (->> loops (map str) (map keyword)) loops)] options)
     
 (defn session
   [_]
  (let [width 10
-       players [{ :name "p1" :patterns [ "0 0 0*2 0"]}
-                { :name "p2" :patterns [ "0(3,8)" "0 0" "0*4" "degrade 8 $ \"0 0\""]}]]
+       players [{:name "p1" :patterns [ "0 0 0*2 0"]}
+                {:name "p2" :patterns [ "0(3,8)" "0 0" "0*4" "degrade 8 $ \"0 0\""]}]]
       [:box {:top 0
              :style {:border {:fg :magenta}}
              :border {:type :line}
@@ -63,7 +43,7 @@
              :right 0
              :width "100%"
              :height "100%"}
-            [horizontal-selector {:columns players}]])) 
+            [horizontal-selector {:options players}]])) 
         ;[:box {:left 0     :width width} [player-column (merge {:active true}  (nth players 1))]]
         ;[:box {:left width :width width} [player-column (merge {:active false} (nth players 1))]]]))
         

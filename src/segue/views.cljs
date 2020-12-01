@@ -111,52 +111,37 @@
    :dim     {:bg :green
              :fg :white}})
 
-(defn horizontal-selector
-  "Display an interactive horizontal selector component.
-
-  Takes a hash-map of props:
-  :bg        keyword|str - Background color of highlighted item.
-  :box       hash-map    - Map of props to merge into menu box properties.
-  :default   keyword     - Selected options map keyword key
-  :fg        keyword|str - Text color of highlighted item.
-  :options   hash-map    - Map of keyword keys to item labels
-  :width     integer     - Width of each column
-
-  Returns a reagent hiccup view element."
-  [{:keys [bg box default fg options width]}]
-  (r/with-let [selected (r/atom (or default (->> options first key)))]
-    (with-keys @screen {["l" "right"]  #(swap! selected next-option options)
-                        ["h" "left"]   #(swap! selected prev-option options)}
-      (let [current @selected
-            column-width (or width 10)]
-        [:box#menu
-         (merge
-          {:top 1
-           :left 1
-           :right 1
-           :bottom 1}
-          box)
-         (for [[idx [value label]] (map-indexed vector options)]
-           [:box {:key value
-                  :left (-> idx (* column-width) (+ 1))
-                  :style {:bg (when (= value current) (or bg :green))
-                          :fg (when (= value current) (or fg :white))}
-                  :width column-width
-                  :content label}])]))))
-
+(defn player-column
+  [{:keys [name patterns active on-select]}]
+  (let [loops (->> patterns (count) (range 0) (map #(str "pat" %)))
+        dakeys (->> loops (map keyword))
+        options (zipmap dakeys loops)]
+    [vertical-menu {:options options
+                    :active active
+                    :on-select on-select ; #(rf/dispatch [:update {:router/view %}]) ; FIXME: Update this callback to display-pattern
+                    :fg :black
+                    :bg :magenta
+                    :box {:scrollable true 
+                          :label name
+                          :border {:type :none}
+                          :style {:border {:fg :magenta}
+                                  :bold true}}}]))
 
 (defn listmap
   [items]
   ())
 
 (defn horizontal-selector
-  [{:keys [columns default]}]
-  (r/with-let [selected (r/atom (->> 0 (str) (keyword) (or default)))]
-    (with-keys @screen {["l" "right"]  #(swap! selected next-option options)
-                        ["h" "left"]   #(swap! selected prev-option options)})
+  [{:keys [bg box default fg options column-width]}]
+  (let [width (or column-width 6)
+        offset 10]
     [:box {:top 1}
-      (for [column columns]
-        [:box {:left 0 :width 10} [:text "haha"]])]))
+      [:box [:text "players"]]
+      (for [[idx player] (map-indexed vector options)]
+        [:box { :key idx
+                :left (->> idx (* width) (+ offset))
+                :width width}
+          [:text (:name player)]])]))
 
 
 (defn help
