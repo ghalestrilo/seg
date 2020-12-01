@@ -79,11 +79,12 @@
     :options {:a \"Item A\"
               :b \"Item B\"
               :c \"Item C\"}})"
-  [{:keys [bg box default fg on-select options]}]
+  [{:keys [bg box default fg on-select options active]}]
   (r/with-let [selected (r/atom (or default (->> options first key)))]
-    (with-keys @screen {["j" "down"]  #(swap! selected next-option options)
-                        ["k" "up"]    #(swap! selected prev-option options)
-                        ["l" "enter"] #(on-select @selected)}
+    (with-keys @screen (if active {["j" "down"]  #(swap! selected next-option options)
+                                   ["k" "up"]    #(swap! selected prev-option options)
+                                   ["l" "enter"] #(on-select @selected)}
+                                  {})
       (let [current @selected]
         [:box#menu
          (merge
@@ -93,12 +94,22 @@
            :bottom 1}
           box)
          (for [[idx [value label]] (map-indexed vector options)]
-           [:box {:key value
+          [:text {:key value
                   :top idx
                   :style {:bg (when (= value current) (or bg :green))
-                          :fg (when (= value current) (or fg :white))}
+                          :fg (when (= value current) (or fg :white))
+                          :transparent (not active)}
+                  :width "100%"
                   :height 1
                   :content label}])]))))
+            
+
+
+(def colors
+  {:default {:bg :green
+             :fg :white}
+   :dim     {:bg :green
+             :fg :white}})
 
 (defn horizontal-selector
   "Display an interactive horizontal selector component.

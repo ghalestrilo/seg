@@ -32,20 +32,30 @@
 ;                         ["l" "enter"] #(on-select @selected)})
 
 (defn player-column
-  [{:keys [name patterns]}]
+  [{:keys [name patterns active]}]
   (let [loops (->> patterns (count) (range 0) (map #(str "pat" %)))
         dakeys (->> loops (map keyword))
         options (zipmap dakeys loops)]
     [vertical-menu {:options options
+                    :active active
                     :on-select #(rf/dispatch [:update {:router/view %}]) ; FIXME: Update this callback to display-pattern
                     :fg :black
                     :bg :magenta
                     :box {:scrollable true 
                           :label name
                           :border {:type :none}
-                          :style {:border {:fg :magenta}}}}]))
+                          :style {:border {:fg :magenta}
+                                  :bold true}}}]))
 
-(let [loops (->> patterns (count) (range 0)) options (zipmap (->> loops (map str) (map keyword)) loops)] options)
+
+
+; (let [loops (->> patterns (count) (range 0)) options (zipmap (->> loops (map str) (map keyword)) loops)] options)
+
+(defn horizontal-test
+  [{:keys [columns]}]
+  (for [column columns]
+    [:box {:left 0 :width 10} [player-column column]]))
+    
 
 (defn session
   [_]
@@ -58,10 +68,10 @@
              :label " Session "
              :right 0
              :width "100%"
-             :height "100%"
+             :height "100%"}
             ;[horizontal-selector { :options []}]])) 
-             [:box {:left 0     :width width} [player-column (nth players 1)]]
-             [:box {:left width :width width} [player-column (merge {:bold true} (nth players 1))]]}]))
+        [:box {:left 0     :width width} [player-column (merge {:active true}  (nth players 1))]]
+        [:box {:left width :width width} [player-column (merge {:active false} (nth players 1))]]]))
         
 
 
