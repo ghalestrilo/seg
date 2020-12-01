@@ -100,7 +100,6 @@
                   :height 1
                   :content label}])]))))
 
-
 (defn horizontal-selector
   "Display an interactive horizontal selector component.
 
@@ -135,6 +134,12 @@
                   :content label}])]))))
 
 (defn help
+  "Display a help box on the corner of the screen with contextual usage information
+
+  Takes a hash map of props:
+  :items [str] - A list of current keybindings, one per line
+
+  Returns a reagent hiccup view element."
   [{:keys [items]}]
   [:box { :top 0
           :style {:border {:fg :magenta}}
