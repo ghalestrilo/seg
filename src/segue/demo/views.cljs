@@ -58,12 +58,11 @@
              :label " Session "
              :right 0
              :width "100%"
-             :height "100%"}
-            ; [horizontal-selector { :options [] }] 
-            [:box {:left 0     :width width} [player-column (nth players 1)]]
-            [:box {:left width :width width} [player-column (merge {:bold true} (nth players 1))]]
-        [help {:items [" up/down - choose pattern"
-                       " left/right - choose player"]}]]))
+             :height "100%"
+            ;[horizontal-selector { :options []}]])) 
+             [:box {:left 0     :width width} [player-column (nth players 1)]]
+             [:box {:left width :width width} [player-column (merge {:bold true} (nth players 1))]]}]))
+        
 
 
 (defn demo
@@ -84,7 +83,11 @@
               :width  "100%"
               :height "100%"}
    (when (not= view :loader) [navbar])
-   [router {:views {:terminal terminal-view
+   [router {:key "2"
+            :views {:terminal terminal-view
                     :home session}
             :view view}]
+   [help {:key "1" :items
+                      ["up/down - choose pattern"
+                       "left/right - choose player"]}]
    child])
