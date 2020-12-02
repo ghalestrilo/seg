@@ -4,7 +4,7 @@
    [clojure.string :refer [join]]
    [re-frame.core :as rf]
    [reagent.core :as r]
-   [segue.views :refer [router vertical-menu]]))
+   [segue.views :refer [router vertical-menu player-grid help]]))
 
 (defn navbar
   "Displays a blessed js box with a vertical-menu used for navigation.
@@ -26,79 +26,36 @@
                    :fg :black
                    :on-select #(rf/dispatch [:update {:router/view %}])}]])
 
-(defn home
-  "Display welcome message and general usage info to user.
-  Returns hiccup :box element."
-  [_]
-  [:box#home
-   {:top 0
-    :right 0
-    :width "70%"
-    :height "50%"
-    :style {:border {:fg :magenta}}
-    :border {:type :line}
-    :label " Intro "}
-   [:box#content
-    {:top 1
-     :left 1
-     :right 1}
-    [:box
-     {:align :center
-      :style {:fg :yellow}
-      :content "Welcome, you are successfully running the app.\nHappy hacking!"}]
-    [:box#keys
-     {:top 5
-      :left 2
-      :right 2
-      :align :left
-      :content "Usage:\n\n  - j/k or up/down to select a page\n  - enter or l to view page"}]]])
+; (with-keys @screen {["j" "down"]  #(swap! selected next-option options)
+;                         ["k" "up"]    #(swap! selected prev-option options)
+;                         ["l" "enter"] #(on-select @selected)})
+; (let [loops (->> patterns (count) (range 0)) options (zipmap (->> loops (map str) (map keyword)) loops)] options)
 
-(defn terminal-view
-  [_]
-  [:box {} "haha"])
+; TODO:
+; 1. Move help items to global state, render L/R
+; move players to global state, bind to session view
+; Document session view
+; 2. Create "Selection" Component
+; 3. Move "selection" to global, make actions update it
+; 4. Create list of Sections (grid view)
 
-(comment 
-(defn loader
-  "Shows a mock-loader progress bar for dramatic effect.
-  - Uses with-let to create a progress atom
-  - Uses a js interval to update it every 15 ms until progress is 100.
-  - Starts the timer on each mount.
-  - Navigates to home page when completed.
-  Returns hiccup :box vector."
+(defn session
   [_]
-  (r/with-let [progress (r/atom 0)
-               interval (js/setInterval #(swap! progress inc) 15)]
-    (when (>= @progress 100)
-      (js/clearInterval interval)
-      (rf/dispatch [:update {:router/view :home}]))
-    [:box#loader
-     {:top 0
-      :width "100%"}
-     [:box
-      {:top 1
-       :width "100%"
-       :align :center
-       :content "Loading Demo"}]
-     [:box
-      {:top 2
-       :width "100%"
-       :align :center
-       :style {:fg :gray}
-       :content "Slow reveal for dramatic effect..."}]
-     [:progressbar
-      {:orientation :horizontal
-       :style {:bar {:bg :magenta}
-               :border {:fg :cyan}
-               :padding 1}
-       :border {:type :line}
-       :filled @progress
-       :left 0
-       :right 0
-       :width "100%"
-       :height 3
-       :top 4
-       :label " progress "}]]))
-)
+ (let [width 10
+       players [{:name "p1" :def "# s \"supervibe\" # gain 0.8" :patterns [ "0 0 0*2 0"]}
+                {:name "p2" :def "# s \"gretsch\" # gain 0.8" :patterns [ "0(3,8)" "0 0" "0*4" "degrade 8 $ \"0 0\""]}]]
+      [:box {:top 0
+             :style {:border {:fg :magenta}}
+             :border {:type :line}
+             :label " Session "
+             :right 0
+             :width "100%"
+             :height "100%"}
+            [player-grid {:options players}]])) 
+        ;[:box {:left 0     :width width} [player-column (merge {:active true}  (nth players 1))]]
+        ;[:box {:left width :width width} [player-column (merge {:active false} (nth players 1))]]]))
+
+
 (defn demo
   "Main demo UI wrapper.
 
@@ -117,7 +74,10 @@
               :width  "100%"
               :height "100%"}
    (when (not= view :loader) [navbar])
-   [router {:views {:terminal terminal-view
-                    :home home}
+   [router {:key "2"
+            :views {:home session}
             :view view}]
+   [help {:key "1" :items
+                      ["up/down - choose pattern"
+                       "left/right - choose player"]}]
    child])

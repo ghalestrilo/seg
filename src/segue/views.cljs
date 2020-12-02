@@ -79,11 +79,12 @@
     :options {:a \"Item A\"
               :b \"Item B\"
               :c \"Item C\"}})"
-  [{:keys [bg box default fg on-select options]}]
+  [{:keys [bg box default fg on-select options active]}]
   (r/with-let [selected (r/atom (or default (->> options first key)))]
-    (with-keys @screen {["j" "down"] #(swap! selected next-option options)
-                        ["k" "up"] #(swap! selected prev-option options)
-                        ["l" "enter"] #(on-select @selected)}
+    (with-keys @screen (if active {["j" "down"]  #(swap! selected next-option options)
+                                   ["k" "up"]    #(swap! selected prev-option options)
+                                   ["l" "enter"] #(on-select @selected)}
+                                  {})
       (let [current @selected]
         [:box#menu
          (merge
@@ -93,9 +94,75 @@
            :bottom 1}
           box)
          (for [[idx [value label]] (map-indexed vector options)]
-           [:box {:key value
+          [:text {:key value
                   :top idx
                   :style {:bg (when (= value current) (or bg :green))
-                          :fg (when (= value current) (or fg :white))}
+                          :fg (when (= value current) (or fg :white))
+                          :transparent (not active)}
+                  :width "100%"
                   :height 1
                   :content label}])]))))
+            
+
+; TODO: Move this
+(def colors
+  {:default {:bg :green
+             :fg :white}
+   :dim     {:bg :green
+             :fg :white}})
+
+(defn player-column
+  [{:keys [name patterns active on-select]}]
+  (let [loops (->> patterns (count) (range 0) (map #(str "pat" %)))
+        dakeys (->> loops (map keyword))
+        options (zipmap dakeys loops)]
+    [vertical-menu {:options options
+                    :active active
+                    :on-select on-select ; #(rf/dispatch [:update {:router/view %}]) ; FIXME: Update this callback to display-pattern
+                    :fg :black
+                    :bg :magenta
+                    :box {:scrollable true 
+                          :label name
+                          :border {:type :none}
+                          :style {:border {:fg :magenta}
+                                  :bold true}}}]))
+
+(defn player-grid
+  "Receives a set of players and renders an interactive grid to control pattern playback
+  
+  Receives a map:
+  
+  Returns a hiccup element"
+  [{:keys [bg box default fg options column-width]}]
+  (r/with-let [selected (r/atom 0)]
+    (with-keys @screen {["h" "left"]  #(swap! selected dec)
+                        ["l" "right"] #(swap! selected inc)}
+      (let [width (or column-width 6)
+            offset 10]
+        [:box {:top 0}
+          [:box [:text "players"]]
+          (for [[idx player] (map-indexed vector options)]
+            [:box { :key idx
+                    :left (->> idx (* width) (+ offset))
+                    :width width}
+              [:text (if (= idx (deref selected)) "me" (:name player))]])]))))
+
+
+(defn help
+  "Display a help box on the corner of the screen with contextual usage information
+
+  Takes a hash map of props:
+  :items [str] - A list of current keybindings, one per line
+
+  Returns a reagent hiccup view element."
+  [{:keys [items]}]
+  [:box { :top 0
+          :style {:border {:fg :magenta}}
+          :border {:type :line}
+          :label " ?? "
+          :right 0
+          :width "25%"
+          :height "50%"}
+    ; for [[idx [value label]] (map-indexed vector options)]
+    (for [[idx item] (map-indexed vector items)]
+      [:text {:key idx :top idx :left 1} item])])
