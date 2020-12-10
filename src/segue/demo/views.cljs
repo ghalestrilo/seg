@@ -32,15 +32,11 @@
 ;                         ["l" "enter"] #(on-select @selected)})
 ; (let [loops (->> patterns (count) (range 0)) options (zipmap (->> loops (map str) (map keyword)) loops)] options)
 
-; TODO:
-; 1. Move help items to global state, render L/R
-; move players to global state, bind to session view
-; Document session view
-; 2. Create "Selection" Component
-; 3. Move "selection" to global, make actions update it
-; 4. Create list of Sections (grid view)
 
 (defn treat-nil-pattern
+  "Helper function for session view
+  Takes a list of patterns
+  Replaces nil with \"nil\" string"
   [patlist]
   (map #(if (nil? %) " " %) patlist))
 
@@ -68,8 +64,7 @@
                                              (into []))]
               [:listtable {:data section-data}])
             [player-grid {:options old-players}])])) 
-        ;[:box {:left 0     :width width} [player-column (merge {:active true}  (nth players 1))]]
-        ;[:box {:left width :width width} [player-column (merge {:active false} (nth players 1))]]]))
+
 
 
 (defn demo
