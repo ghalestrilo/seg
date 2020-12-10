@@ -25,3 +25,18 @@
           view @(rf/subscribe [:view])]
       (if view (view help-content) help-content)))) ; FIXME: Replace :home with view here
 
+
+(rf/reg-sub
+  :track
+  (fn [db _]
+    (:track db)))
+
+(rf/reg-sub
+  :players
+  (fn [db _]
+    (-> db :track :players)))
+
+(rf/reg-sub
+  :sections
+  (fn [db _]
+    (-> db :track :sections)))

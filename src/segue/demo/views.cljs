@@ -44,8 +44,12 @@
 (defn session
   [_]
  (let [width 10
+       new-players @(rf/subscribe [:players])
+       sections @(rf/subscribe [:sections])
        players [{:name "p1" :def "# s \"supervibe\" # gain 0.8" :patterns [ "0 0 0*2 0"]}
                 {:name "p2" :def "# s \"gretsch\" # gain 0.8" :patterns [ "0(3,8)" "0 0" "0*4" "degrade 8 $ \"0 0\""]}]]
+      (println sections)
+      (println new-players)
       [:box {:top 0
              :style {:border {:fg :magenta}}
              :border {:type :line}

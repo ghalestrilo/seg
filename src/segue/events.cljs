@@ -14,13 +14,25 @@
       :left/right "Choose player"
       :enter      "Trigger section"}})
 
+(def demo-track
+  {:players      ["drums" "piano" "bass" "vibe"]
+   :sections     [[nil    nil     "0"    nil]
+                  [nil    nil     "0"    nil]
+                  [nil    nil     "0"    nil]
+                  [nil    nil     "0"    nil]]
+                  
+   :pattern-bank []})
+    
+  
+
 (rf/reg-event-db
   :init
   (fn [db [_ opts terminal-size]]
     {:opts opts
      :router/view :home
      :terminal/size terminal-size
-     :dialog/help help-messages}))
+     :dialog/help help-messages
+     :track demo-track}))
 
 (rf/reg-event-db
   :update
