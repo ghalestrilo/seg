@@ -4,7 +4,7 @@
    [clojure.string :refer [join]]
    [re-frame.core :as rf]
    [reagent.core :as r]
-   [segue.views :refer [router vertical-menu player-grid]]
+   [segue.views :refer [router vertical-menu player-grid session-section-mode]]
    [segue.components :refer [help]]))
 
 (defn navbar
@@ -27,12 +27,6 @@
                    :fg :black
                    :on-select #(rf/dispatch [:update {:router/view %}])}]])
 
-; (with-keys @screen {["j" "down"]  #(swap! selected next-option options)
-;                         ["k" "up"]    #(swap! selected prev-option options)
-;                         ["l" "enter"] #(on-select @selected)})
-; (let [loops (->> patterns (count) (range 0)) options (zipmap (->> loops (map str) (map keyword)) loops)] options)
-
-
 (defn treat-nil-pattern
   "Helper function for session view
   Takes a list of patterns
@@ -40,29 +34,40 @@
   [patlist]
   (map #(if (nil? %) " " %) patlist))
 
+
+; (def grid-mode (r/atom true)) ; FIXME: why does this not work inside let?
+
 (defn session
   [_]
- (let [width 10
-       grid-mode (r/atom true)
-       players @(rf/subscribe [:players])
-       sections @(rf/subscribe [:sections])
-       old-players [{:name "p1" :def "# s \"supervibe\" # gain 0.8" :patterns [ "0 0 0*2 0"]}
-                    {:name "p2" :def "# s \"gretsch\" # gain 0.8"   :patterns [ "0(3,8)" "0 0" "0*4" "degrade 8 $ \"0 0\""]}]]
-      [:box {:top 0
-             :style {:border {:fg :magenta}}
-             :border {:type :line}
-             :label " Session "
-             :right 0
-             :width "100%"
-             :height "100%"}
-        (if (true? @grid-mode)
+  (r/with-let
+       [width 10
+        selected        (r/atom 0)
+        grid-mode       (r/atom true)
+        toggle-mode    #(swap! grid-mode not)
+        players        @(rf/subscribe [:players])
+        sections       @(rf/subscribe [:sections])
+        old-players [ {:name "p1" :def "# s \"supervibe\" # gain 0.8" :patterns [ "0 0 0*2 0"]}
+                      {:name "p2" :def "# s \"gretsch\" # gain 0.8"   :patterns [ "0(3,8)" "0 0" "0*4" "degrade 8 $ \"0 0\""]}]]
+        
+      [:box { :top 0
+              :style {:border { :fg :magenta}}
+              :border {:type :line}
+              :label (if @grid-mode " Session " " Grid ")
+              :right 0
+              :width "100%"
+              :height "100%"}
+        (if @grid-mode
             (let [section-data (->> sections (map :patterns)
-                                             (map treat-nil-pattern)
-                                             (into [players]))]
-              [:listtable {:data section-data
-                           :default 0
-                           :style {:selected {:bold true}}}])
-            [player-grid {:options old-players}])])) 
+                                            (map treat-nil-pattern)
+                                            (into [players]))]
+              [session-section-mode
+                { :toggle-mode toggle-mode
+                  :section-data section-data
+                  :selected selected}])
+                  
+            [player-grid
+              {:options old-players
+               :toggle-mode toggle-mode}])])) 
 
 
 

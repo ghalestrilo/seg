@@ -133,10 +133,13 @@
   Receives a map:
   
   Returns a hiccup element"
-  [{:keys [bg box default fg options column-width]}]
-  (r/with-let [selected (r/atom 0)]
-    (with-keys @screen {["h" "left"]  #(swap! selected dec)
-                        ["l" "right"] #(swap! selected inc)}
+  [{:keys [bg box default fg options column-width selected-row toggle-mode]}]
+  (r/with-let [selected-player (r/atom 0)]
+    (with-keys @screen {["h" "left"]  #(if (zero? @selected-player)
+                                           (toggle-mode)
+                                           (swap! selected-row dec))
+                                            
+                        ["l" "right"] #(swap! selected-row inc)}
       (let [width (or column-width 6)
             offset 10]
         [:box {:top 0}
@@ -147,4 +150,19 @@
             [:box { :key idx
                     :left (->> idx (* width) (+ offset))
                     :width width}
-              [:text (if (= idx (deref selected)) "me" (:name player))]])]))))
+              [:text (if (= idx (deref selected-player)) "me" (:name player))]])]))))
+
+
+(defn session-section-mode
+  [{:keys [section-data selected toggle-mode]}]
+  (with-keys @screen {["j" "down"]  #(swap! selected inc)
+                      ["k" "up"]    #(swap! selected dec)
+                      ["l" "right"] toggle-mode
+                      ["e" "enter"] #(on-select @selected)}
+    (let []
+      [:listtable {:data section-data
+                           :default 0
+                           :style {:selected {:bold true}}}])))
+      
+      
+
