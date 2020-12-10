@@ -48,9 +48,6 @@
        sections @(rf/subscribe [:sections])
        old-players [{:name "p1" :def "# s \"supervibe\" # gain 0.8" :patterns [ "0 0 0*2 0"]}
                     {:name "p2" :def "# s \"gretsch\" # gain 0.8"   :patterns [ "0(3,8)" "0 0" "0*4" "degrade 8 $ \"0 0\""]}]]
-      (println sections)
-      (println (into [] (map :patterns sections)))
-      (println players)
       [:box {:top 0
              :style {:border {:fg :magenta}}
              :border {:type :line}
@@ -61,8 +58,10 @@
         (if (true? @grid-mode)
             (let [section-data (->> sections (map :patterns)
                                              (map treat-nil-pattern)
-                                             (into []))]
-              [:listtable {:data section-data}])
+                                             (into [players]))]
+              [:listtable {:data section-data
+                           :default 0
+                           :style {:selected {:bold true}}}])
             [player-grid {:options old-players}])])) 
 
 
