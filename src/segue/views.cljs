@@ -137,9 +137,11 @@
   (r/with-let [selected-player (r/atom 0)]
     (with-keys @screen {["h" "left"]  #(if (zero? @selected-player)
                                            (toggle-mode)
-                                           (swap! selected-row dec))
+                                           (swap! selected-player dec))
                                             
-                        ["l" "right"] #(swap! selected-row inc)}
+                        ["l" "right"] #(swap! selected-player inc)
+                        ["k" "up"]    #(swap! selected-row dec)
+                        ["j" "down"]  #(swap! selected-row inc)}
       (let [width (or column-width 6)
             offset 10]
         [:box {:top 0}
@@ -150,8 +152,10 @@
             [:box { :key idx
                     :left (->> idx (* width) (+ offset))
                     :width width}
-              [:text (if (= idx (deref selected-player)) "me" (:name player))]])]))))
+              ;FIXME: This breaks
+              [:text "me"]])]))))
 
+; Reactive deref not supported in lazy seq, it should be wrapped in doall: ([:box {:key 0, :left 10, :width 6} [:text "me"]] [:box {:key 1, :left 16, :width 6} [:text "p2"]])
 
 (defn session-section-mode
   [{:keys [section-data selected toggle-mode]}]

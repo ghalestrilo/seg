@@ -21,9 +21,9 @@
                   {:name "theme"
                    :patterns [nil    nil     "0"    nil]}
                   {:name "bridge"
-                   :patterns [nil    nil     "0"    nil]}
+                   :patterns [nil    "0*4"   "0"    nil]}
                   {:name "outro"
-                   :patterns [nil    nil     "0"    nil]}]
+                   :patterns [nil    nil     "0"    "0(3,8)"]}]
                   
    :pattern-bank []})
     
