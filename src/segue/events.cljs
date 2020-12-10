@@ -10,8 +10,8 @@
 
 (def help-messages
   { :home
-    { :up/down    "Choose  section/pattern"
-      :left/right "Choose  player"
+    { :up/down    "Choose section/pattern"
+      :left/right "Choose player"
       :enter      "Trigger section"}})
 
 (rf/reg-event-db

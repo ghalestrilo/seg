@@ -21,7 +21,7 @@
             :width "25%"
             :height "50%"}
       ; for [[idx [value label]] (map-indexed vector options)]
-      (println help-content)
-      (for [[idx item] (map-indexed vector items)]
-        [:text {:key idx :top idx :left 1} "haha"])]))
+      ; (println help-content)
+      (for [[idx [keyname action]] (map-indexed vector help-content)]
+        [:text {:key idx :top idx :left 1} (str keyname " - " action)])]))
 
