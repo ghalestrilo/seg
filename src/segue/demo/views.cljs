@@ -40,6 +40,9 @@
 ; 3. Move "selection" to global, make actions update it
 ; 4. Create list of Sections (grid view)
 
+(defn treat-nil-pattern
+  [patlist]
+  (map #(if (nil? %) " " %) patlist))
 
 (defn session
   [_]
@@ -60,9 +63,10 @@
              :width "100%"
              :height "100%"}
         (if (true? @grid-mode)
-            (let [section-data (->> sections (map :patterns) (into []))]
+            (let [section-data (->> sections (map :patterns)
+                                             (map treat-nil-pattern)
+                                             (into []))]
               [:listtable {:data section-data}])
-              ; [:listtable {:data (into [] (map :patterns sections))}])
             [player-grid {:options old-players}])])) 
         ;[:box {:left 0     :width width} [player-column (merge {:active true}  (nth players 1))]]
         ;[:box {:left width :width width} [player-column (merge {:active false} (nth players 1))]]]))
