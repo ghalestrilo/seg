@@ -8,12 +8,19 @@
 ; going quickly you are likely better off creating custom handlers for actions
 ; specific to your application.
 
+(def help-messages
+  { :home
+    { :up/down    "Choose  section/pattern"
+      :left/right "Choose  player"
+      :enter      "Trigger section"}})
+
 (rf/reg-event-db
   :init
   (fn [db [_ opts terminal-size]]
     {:opts opts
      :router/view :home
-     :terminal/size terminal-size}))
+     :terminal/size terminal-size
+     :dialog/help help-messages}))
 
 (rf/reg-event-db
   :update

@@ -141,28 +141,10 @@
             offset 10]
         [:box {:top 0}
           [:box [:text "players"]]
+            ;(for sections)
+            
           (for [[idx player] (map-indexed vector options)]
             [:box { :key idx
                     :left (->> idx (* width) (+ offset))
                     :width width}
               [:text (if (= idx (deref selected)) "me" (:name player))]])]))))
-
-
-(defn help
-  "Display a help box on the corner of the screen with contextual usage information
-
-  Takes a hash map of props:
-  :items [str] - A list of current keybindings, one per line
-
-  Returns a reagent hiccup view element."
-  [{:keys [items]}]
-  [:box { :top 0
-          :style {:border {:fg :magenta}}
-          :border {:type :line}
-          :label " ?? "
-          :right 0
-          :width "25%"
-          :height "50%"}
-    ; for [[idx [value label]] (map-indexed vector options)]
-    (for [[idx item] (map-indexed vector items)]
-      [:text {:key idx :top idx :left 1} item])])
