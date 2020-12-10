@@ -143,30 +143,36 @@
                         ["k" "up"]    #(swap! selected-row dec)
                         ["j" "down"]  #(swap! selected-row inc)}
       (let [width (or column-width 6)
-            offset 10]
+            offset 10
+            player-selected? #(= selected-player-index %)]
         [:box {:top 0}
           [:box [:text "players"]]
             ;(for sections)
-            
-          (for [[idx player] (map-indexed vector options)]
-            [:box { :key idx
-                    :left (->> idx (* width) (+ offset))
-                    :width width}
-              ;FIXME: This breaks
-              [:text "me"]])]))))
+          (doall  
+            (for [[idx player] (map-indexed vector options)]
+              [:box { :key idx
+                      :left (->> idx (* width) (+ offset))
+                      :width width
+                      :style (if (= @selected-player idx)
+                                 {:bg "magenta"}
+                                 {:bg "transparent"})}
+                [:text {:style {:bg "magenta"}} (str idx " = " @selected-player)]]))]))))
 
 ; Reactive deref not supported in lazy seq, it should be wrapped in doall: ([:box {:key 0, :left 10, :width 6} [:text "me"]] [:box {:key 1, :left 16, :width 6} [:text "p2"]])
 
+; TODO: How do I move the selection up/down?
 (defn session-section-mode
-  [{:keys [section-data selected toggle-mode]}]
-  (with-keys @screen {["j" "down"]  #(swap! selected inc)
-                      ["k" "up"]    #(swap! selected dec)
+  [{:keys [section-data selected toggle-mode select-next select-prev]}]
+  (with-keys @screen {["j" "down"]  select-next
+                      ["k" "up"]    select-prev
                       ["l" "right"] toggle-mode
-                      ["e" "enter"] #(on-select @selected)}
+                      ["e" "enter"] #(if on-select (on-select @selected)
+                                                   (println "[session-section-mode] No on-select callback!"))}
     (let []
-      [:listtable {:data section-data
-                           :default 0
-                           :style {:selected {:bold true}}}])))
+      [:listtable { :data section-data
+                    :vi true
+                    :style {:selected {:bold true :bg "magenta"}
+                            :header   {:bold true}}}])))
       
       
 

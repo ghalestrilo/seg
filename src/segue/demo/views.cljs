@@ -41,9 +41,12 @@
   [_]
   (r/with-let
        [width 10
-        selected        (r/atom 0)
-        grid-mode       (r/atom true)
-        toggle-mode    #(swap! grid-mode not)
+        selected    (r/atom 0)
+        grid-mode   (r/atom true)
+        toggle-mode #(swap! grid-mode not)
+        select-next #(swap! selected inc)
+        select-prev #(swap! selected dec)
+        
         players        @(rf/subscribe [:players])
         sections       @(rf/subscribe [:sections])
         old-players [ {:name "p1" :def "# s \"supervibe\" # gain 0.8" :patterns [ "0 0 0*2 0"]}
@@ -57,11 +60,14 @@
               :width "100%"
               :height "100%"}
         (if @grid-mode
-            (let [section-data (->> sections (map :patterns)
-                                            (map treat-nil-pattern)
-                                            (into [players]))]
+            (let [section-data (->> sections
+                                    (map :patterns)
+                                    (map treat-nil-pattern)
+                                    (into [players]))]
               [session-section-mode
                 { :toggle-mode toggle-mode
+                  :select-next select-next
+                  :select-prev select-prev
                   :section-data section-data
                   :selected selected}])
                   
