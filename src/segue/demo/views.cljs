@@ -4,7 +4,8 @@
    [clojure.string :refer [join]]
    [re-frame.core :as rf]
    [reagent.core :as r]
-   [segue.views :refer [router vertical-menu player-grid help]]))
+   [segue.views :refer [router vertical-menu player-grid]]
+   [segue.components :refer [help]]))
 
 (defn navbar
   "Displays a blessed js box with a vertical-menu used for navigation.
@@ -38,6 +39,7 @@
 ; 2. Create "Selection" Component
 ; 3. Move "selection" to global, make actions update it
 ; 4. Create list of Sections (grid view)
+
 
 (defn session
   [_]

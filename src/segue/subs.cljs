@@ -17,3 +17,11 @@
   :size
   (fn [db _]
     (:terminal/size db)))
+
+(rf/reg-sub
+  :help
+  (fn [db _]
+    (let [help-content (:dialog/help db)
+          view @(rf/subscribe [:view])]
+      (if view (view help-content) help-content)))) ; FIXME: Replace :home with view here
+
