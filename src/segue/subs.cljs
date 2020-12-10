@@ -20,7 +20,8 @@
 
 (rf/reg-sub
   :help
-  (let [view @(rf/subscribe [:view])]
-    (fn [db _]
-      (-> db :dialog/help :home)))) ; FIXME: Replace :home with view here
+  (fn [db _]
+    (let [help-content (:dialog/help db)
+          view @(rf/subscribe [:view])]
+      (if view (view help-content) help-content)))) ; FIXME: Replace :home with view here
 
