@@ -44,12 +44,14 @@
 (defn session
   [_]
  (let [width 10
-       new-players @(rf/subscribe [:players])
+       grid-mode (r/atom true)
+       players @(rf/subscribe [:players])
        sections @(rf/subscribe [:sections])
-       players [{:name "p1" :def "# s \"supervibe\" # gain 0.8" :patterns [ "0 0 0*2 0"]}
-                {:name "p2" :def "# s \"gretsch\" # gain 0.8" :patterns [ "0(3,8)" "0 0" "0*4" "degrade 8 $ \"0 0\""]}]]
+       old-players [{:name "p1" :def "# s \"supervibe\" # gain 0.8" :patterns [ "0 0 0*2 0"]}
+                    {:name "p2" :def "# s \"gretsch\" # gain 0.8"   :patterns [ "0(3,8)" "0 0" "0*4" "degrade 8 $ \"0 0\""]}]]
       (println sections)
-      (println new-players)
+      (println (into [] (map :patterns sections)))
+      (println players)
       [:box {:top 0
              :style {:border {:fg :magenta}}
              :border {:type :line}
@@ -57,7 +59,11 @@
              :right 0
              :width "100%"
              :height "100%"}
-            [player-grid {:options players}]])) 
+        (if (true? @grid-mode)
+            (let [section-data (->> sections (map :patterns) (into []))]
+              [:listtable {:data section-data}])
+              ; [:listtable {:data (into [] (map :patterns sections))}])
+            [player-grid {:options old-players}])])) 
         ;[:box {:left 0     :width width} [player-column (merge {:active true}  (nth players 1))]]
         ;[:box {:left width :width width} [player-column (merge {:active false} (nth players 1))]]]))
 

@@ -16,10 +16,14 @@
 
 (def demo-track
   {:players      ["drums" "piano" "bass" "vibe"]
-   :sections     [[nil    nil     "0"    nil]
-                  [nil    nil     "0"    nil]
-                  [nil    nil     "0"    nil]
-                  [nil    nil     "0"    nil]]
+   :sections     [{:name "intro"
+                   :patterns ["nil"    "nil"     "0"    "nil"]}
+                  {:name "theme"
+                   :patterns ["nil"    "nil"     "0"    "nil"]}
+                  {:name "bridge"
+                   :patterns ["nil"    "nil"     "0"    "nil"]}
+                  {:name "outro"
+                   :patterns ["nil"    "nil"     "0"    "nil"]}]
                   
    :pattern-bank []})
     
