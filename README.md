@@ -11,10 +11,11 @@ A LiveCoding Session Manager.
 Open a file with `./seg <filename>`. seg will detect the channels, sections, players and instruments declared on the track and display a grid.
 
 Supports the following tools:
--[ ] TidalCycles
--[ ] FoxDot
--[ ] Sonic Pi
--[ ] SuperCollider
+
+ - [ ] TidalCycles
+ - [ ] FoxDot
+ - [ ] Sonic Pi
+ - [ ] SuperCollider
 
 Made with ❤ and ClojureScript
 
