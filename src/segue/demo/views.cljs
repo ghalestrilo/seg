@@ -27,13 +27,6 @@
                    :fg :black
                    :on-select #(rf/dispatch [:update {:router/view %}])}]])
 
-(defn treat-nil-pattern
-  "Helper function for session view
-  Takes a list of patterns
-  Replaces nil with \"nil\" string"
-  [patlist]
-  (map #(if (nil? %) " " %) patlist))
-
 
 ; (def grid-mode (r/atom true)) ; FIXME: why does this not work inside let?
 
@@ -60,16 +53,13 @@
               :width "100%"
               :height "100%"}
         (if @grid-mode
-            (let [section-data (->> sections
-                                    (map :patterns)
-                                    (map treat-nil-pattern)
-                                    (into [players]))]
+            
               [session-section-mode
                 { :toggle-mode toggle-mode
                   :select-next select-next
                   :select-prev select-prev
-                  :section-data section-data
-                  :selected selected}])
+                  :section-data sections
+                  :selected selected}]
                   
             [player-grid
               {:options old-players

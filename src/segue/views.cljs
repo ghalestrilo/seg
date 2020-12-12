@@ -3,7 +3,11 @@
   (:require
    [reagent.core :as r]
    [segue.core :refer [screen]]
+   [cljs.nodejs :as node :refer [require]]
    [segue.keys :refer [with-keys]]))
+
+(def blessed (node/require "blessed"))
+
 
 (defn router
   "Takes a map of props:
@@ -156,23 +160,46 @@
                       :style (if (= @selected-player idx)
                                  {:bg "magenta"}
                                  {:bg "transparent"})}
-                [:text {:style {:bg "magenta"}} (str idx " = " @selected-player)]]))]))))
+                [:text {:style {:bg "magenta"}}
+                       (str idx " = " @selected-player)]]))]))))
 
 ; Reactive deref not supported in lazy seq, it should be wrapped in doall: ([:box {:key 0, :left 10, :width 6} [:text "me"]] [:box {:key 1, :left 16, :width 6} [:text "p2"]])
 
+; space: start/stop
+; e: edit
+; c/enter: choose section
+
+(defn treat-nil-pattern
+  "Helper function for session view
+  Takes a list of patterns
+  Replaces nil with \"nil\" string"
+  [patlist]
+  (map #(if (nil? %) " " %) patlist))
+
 ; TODO: How do I move the selection up/down?
 (defn session-section-mode
-  [{:keys [section-data selected toggle-mode select-next select-prev]}]
-  (with-keys @screen {["j" "down"]  select-next
-                      ["k" "up"]    select-prev
+  [{:keys [channel-data section-data selected toggle-mode select-next select-prev]}]
+  (with-keys @screen {
                       ["l" "right"] toggle-mode
                       ["e" "enter"] #(if on-select (on-select @selected)
                                                    (println "[session-section-mode] No on-select callback!"))}
-    (let []
-      [:listtable { :data section-data
-                    :vi true
-                    :style {:selected {:bold true :bg "magenta"}
-                            :header   {:bold true}}}])))
-      
+    [:box
+      (for [[section-idx section] (map-indexed vector section-data)]
+        [:box { :top (+ 1 section-idx)
+                :key (str idx)}
+          (:name section)
+          (for [[pat-idx pattern] (map-indexed vector (:patterns section))
+                pattern-text (treat-nil-pattern pattern)]
+            [:text {:left (* 10 pat-idx)
+                    :key (str "pat" 2 section-idx "-" pat-idx)} 
+              pattern-text])])]))
+          
+          
       
 
+(comment
+  [:listtable { :data section-data
+                    :keys "vi"
+                    :interactive true
+                    :style {:selected {:bold true :bg "magenta"}
+                            :header   {:bold true}}}])
