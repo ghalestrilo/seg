@@ -140,8 +140,8 @@
                                            (swap! selected-player dec))
                                             
                         ["l" "right"] #(swap! selected-player inc)
-                        ["k" "up"]    #(swap! selected-row dec)
-                        ["j" "down"]  #(swap! selected-row inc)}
+                        ["k" "up"]    select-prev
+                        ["j" "down"]  select-next}
       (let [width (or column-width 6)
             offset 10
             player-selected? #(= selected-player-index %)]
