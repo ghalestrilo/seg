@@ -5,6 +5,8 @@ A LiveCoding Session Manager.
 ## ⚠️ Work in Progress ⚠️
 (nothing works right now)
 
+![asdasd](img/2020-12-12-seg.png) 
+
 
 Open a file with `./seg <filename>`. seg will detect the channels, sections, players and instruments declared on the track and display a grid.
 
