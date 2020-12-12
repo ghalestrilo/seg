@@ -1,9 +1,35 @@
-# segue
-A ClojureScript TUI to ...
+# seg
+
+A LiveCoding Session Manager.
+
+## ⚠️ Work in Progress ⚠️
+(nothing works right now)
+
+![asdasd](img/2020-12-12-seg.png) 
+
+
+Open a file with `./seg <filename>`. seg will detect the channels, sections, players and instruments declared on the track and display a grid.
+
+Supports the following tools:
+-[ ] TidalCycles
+-[ ] FoxDot
+-[ ] Sonic Pi
+-[ ] SuperCollider
+
+Made with ❤ and ClojureScript
 
 ## Installation
 
+The tool is under development following the [cljs-tui-template](https://github.com/eccentric-j/cljs-tui-template). Read about it for more information on how the project is structured and how to contribute.
+
+TL;DR it uses [reagent](https://reagent-project.github.io/)/[reframe](https://github.com/Day8/re-frame) ([react](https://reactjs.org/)/[redux](https://redux.js.org/) for cljs) to create interfaces using [react-blessed](https://github.com/Yomguithereal/react-blessed) components, which interface with the [blessed](https://github.com/chjj/blessed) terminal interface engine.
+
+ATM. I'm organizing the project roadmap via issues. Feel free to grab one and tackle it.
+
 ## Usage
+
+Choose section with `up/down` (`j/k`), press `enter` to trigger a section, press `e` to edit a section/pattern/player with your favorite text editor.
+
 
 ## License
 Copyright 2020 FIXME
