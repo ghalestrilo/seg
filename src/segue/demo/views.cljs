@@ -59,7 +59,8 @@
                   :select-next select-next
                   :select-prev select-prev
                   :section-data sections
-                  :selected selected}]
+                  :channel-data players
+                  :selected @selected}]
                   
             [player-grid
               {:options old-players

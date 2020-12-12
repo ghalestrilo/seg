@@ -165,10 +165,6 @@
 
 ; Reactive deref not supported in lazy seq, it should be wrapped in doall: ([:box {:key 0, :left 10, :width 6} [:text "me"]] [:box {:key 1, :left 16, :width 6} [:text "p2"]])
 
-; space: start/stop
-; e: edit
-; c/enter: choose section
-
 (defn treat-nil-pattern
   "Helper function for session view
   Takes a list of patterns
@@ -176,26 +172,45 @@
   [patlist]
   (map #(if (nil? %) " " %) patlist))
 
-; TODO: How do I move the selection up/down?
+;TODO: I decided to implement my own listtable component so here's the deal
+; 1. Find out why the patterns are being rendered wrong here
+; 2. Make line-wise selection work
+; 3. Make callbacks
+  ; space: start/stop
+  ; e: edit
+  ; c/enter: choose section
+
 (defn session-section-mode
   [{:keys [channel-data section-data selected toggle-mode select-next select-prev]}]
-  (with-keys @screen {
-                      ["l" "right"] toggle-mode
-                      ["e" "enter"] #(if on-select (on-select @selected)
-                                                   (println "[session-section-mode] No on-select callback!"))}
-    [:box
-      (for [[section-idx section] (map-indexed vector section-data)]
-        [:box { :top (+ 1 section-idx)
-                :key (str idx)}
-          (:name section)
-          (for [[pat-idx pattern] (map-indexed vector (:patterns section))
-                pattern-text (treat-nil-pattern pattern)]
-            [:text {:left (* 10 pat-idx)
-                    :key (str "pat" 2 section-idx "-" pat-idx)} 
-              pattern-text])])]))
-          
-          
-      
+  (let [width (or column-width 8)]
+    (with-keys @screen {["k" "up"]    select-prev
+                        ["j" "down"]  select-next
+                        ["l" "right"] toggle-mode
+                        ["e" "enter"] #(if on-select (on-select @selected)
+                                                     (println "[session-section-mode] No on-select callback!"))}
+      [:box
+        ; Header: Channels
+        (for [[channel-idx channel] (map-indexed vector channel-data)]
+          [:text {:left (-> channel-idx  (+ 1) (* width))
+                  :key  (str "pat" 2 section-idx "-" pat-idx)}
+            channel])
+        ; Sections (vertical list)
+        (for [[section-idx section] (map-indexed vector section-data)]
+          [:box { :top (+ 1 section-idx)
+                  :style (if (= selected channel-idx)
+                             {:bg "magenta"}
+                             {:bg "transparent"})
+                  :key (str idx)}
+            (:name section)
+            
+            ; Section Patterns (Horizontal list)
+            (for [[pat-idx pattern] (map-indexed vector (:patterns section))]
+              [:text {:left (-> pat-idx  (+ 1) (* width))
+                      :key (str "pat" 2 section-idx "-" pat-idx)} 
+                pattern])])])))
+            
+            
+        
 
 (comment
   [:listtable { :data section-data
