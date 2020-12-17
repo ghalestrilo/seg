@@ -4,7 +4,7 @@
    [clojure.string :refer [join]]
    [re-frame.core :as rf]
    [reagent.core :as r]
-   [segue.views :refer [router vertical-menu player-grid]]
+   [segue.views :refer [router vertical-menu player-grid session-section-mode]]
    [segue.components :refer [help]]))
 
 (defn navbar
@@ -27,35 +27,44 @@
                    :fg :black
                    :on-select #(rf/dispatch [:update {:router/view %}])}]])
 
-; (with-keys @screen {["j" "down"]  #(swap! selected next-option options)
-;                         ["k" "up"]    #(swap! selected prev-option options)
-;                         ["l" "enter"] #(on-select @selected)})
-; (let [loops (->> patterns (count) (range 0)) options (zipmap (->> loops (map str) (map keyword)) loops)] options)
 
-; TODO:
-; 1. Move help items to global state, render L/R
-; move players to global state, bind to session view
-; Document session view
-; 2. Create "Selection" Component
-; 3. Move "selection" to global, make actions update it
-; 4. Create list of Sections (grid view)
-
+; (def grid-mode (r/atom true)) ; FIXME: why does this not work inside let?
 
 (defn session
   [_]
- (let [width 10
-       players [{:name "p1" :def "# s \"supervibe\" # gain 0.8" :patterns [ "0 0 0*2 0"]}
-                {:name "p2" :def "# s \"gretsch\" # gain 0.8" :patterns [ "0(3,8)" "0 0" "0*4" "degrade 8 $ \"0 0\""]}]]
-      [:box {:top 0
-             :style {:border {:fg :magenta}}
-             :border {:type :line}
-             :label " Session "
-             :right 0
-             :width "100%"
-             :height "100%"}
-            [player-grid {:options players}]])) 
-        ;[:box {:left 0     :width width} [player-column (merge {:active true}  (nth players 1))]]
-        ;[:box {:left width :width width} [player-column (merge {:active false} (nth players 1))]]]))
+  (r/with-let
+       [width 10
+        row    (r/atom 0)
+        grid-mode   (r/atom true)
+        players        @(rf/subscribe [:players])
+        sections       @(rf/subscribe [:sections])
+        toggle-mode #(swap! grid-mode not)
+        select-next #(swap! row (if (-> '@(rf/subscribe [:sections]) count (+ 1) (< @row)) identity inc)) ; FIXME: I have no clue if this is the best way to limit 
+        select-prev #(swap! row (if (= @row 0) identity dec))
+        old-players [ {:name "p1" :def "# s \"supervibe\" # gain 0.8" :patterns [ "0 0 0*2 0"]}
+                      {:name "p2" :def "# s \"gretsch\" # gain 0.8"   :patterns [ "0(3,8)" "0 0" "0*4" "degrade 8 $ \"0 0\""]}]]
+    (fn [_]
+      [:box { :top 0
+              :style {:border { :fg :magenta}}
+              :border {:type :line}
+              :label (if @grid-mode " Choose Section " " Choose Pattern ")
+              :right 0
+              :width "100%"
+              :height "100%"}
+        (if @grid-mode
+            
+              [session-section-mode
+                { :toggle-mode toggle-mode
+                  :select-next select-next
+                  :select-prev select-prev
+                  :section-data sections
+                  :channel-data players
+                  :selected    @row}]
+                  
+            [player-grid
+              {:options old-players
+               :toggle-mode toggle-mode}])]))) 
+
 
 
 (defn demo

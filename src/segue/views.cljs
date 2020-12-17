@@ -3,7 +3,11 @@
   (:require
    [reagent.core :as r]
    [segue.core :refer [screen]]
+   [cljs.nodejs :as node :refer [require]]
    [segue.keys :refer [with-keys]]))
+
+(def blessed (node/require "blessed"))
+
 
 (defn router
   "Takes a map of props:
@@ -133,18 +137,97 @@
   Receives a map:
   
   Returns a hiccup element"
-  [{:keys [bg box default fg options column-width]}]
-  (r/with-let [selected (r/atom 0)]
-    (with-keys @screen {["h" "left"]  #(swap! selected dec)
-                        ["l" "right"] #(swap! selected inc)}
+  [{:keys [bg box default fg options column-width selected-row toggle-mode]}]
+  (r/with-let [selected-player (r/atom 0)]
+    (with-keys @screen {["h" "left"]  #(if (zero? @selected-player)
+                                           (toggle-mode)
+                                           (swap! selected-player dec))
+                                            
+                        ["l" "right"] #(swap! selected-player inc)
+                        ["k" "up"]    select-prev
+                        ["j" "down"]  select-next}
       (let [width (or column-width 6)
-            offset 10]
+            offset 10
+            player-selected? #(= selected-player-index %)]
         [:box {:top 0}
           [:box [:text "players"]]
             ;(for sections)
-            
-          (for [[idx player] (map-indexed vector options)]
-            [:box { :key idx
-                    :left (->> idx (* width) (+ offset))
-                    :width width}
-              [:text (if (= idx (deref selected)) "me" (:name player))]])]))))
+          (doall  
+            (for [[idx player] (map-indexed vector options)]
+              [:box { :key idx
+                      :left (->> idx (* width) (+ offset))
+                      :width width
+                      :style (if (= @selected-player idx)
+                                 {:bg "magenta"}
+                                 {:bg "transparent"})}
+                [:text {:style {:bg "magenta"}}
+                       (str idx " = " @selected-player)]]))]))))
+
+; Reactive deref not supported in lazy seq, it should be wrapped in doall: ([:box {:key 0, :left 10, :width 6} [:text "me"]] [:box {:key 1, :left 16, :width 6} [:text "p2"]])
+
+(defn treat-nil-pattern
+  "Helper function for session view
+  Takes a list of patterns
+  Replaces nil with \"nil\" string"
+  [patlist]
+  (map #(if (nil? %) " " %) patlist))
+
+;TODO: I decided to implement my own listtable component so here's the deal
+; 1. Find out why the patterns are being rendered wrong here
+; 2. Make line-wise selection work
+; 3. Make callbacks
+  ; space: start/stop
+  ; e: edit
+  ; c/enter: choose section
+  ; m + idx(s): mute idxes
+
+(defn session-section-mode
+  "...docstring"
+  [{:keys [channel-data section-data selected toggle-mode select-next select-prev]}]
+  ; Render
+  (fn [{:keys [channel-data section-data selected toggle-mode select-next select-prev]}]
+    (let [selected-row selected
+          width 10
+          cell-style #(if (= % selected-row) {:bg "magenta" :fg "black"} {:bg "transparent" :fg "white"})]
+      (with-keys @screen {["k" "up"]    select-prev
+                          ["j" "down"]  select-next
+                          ["l" "right"] toggle-mode
+                          ["e" "enter"] #(if on-select (on-select selected-row
+                                                        (println "[session-section-mode] No on-select callback!")))}
+        [:box
+          ; Header: Channels
+          (for [[channel-idx channel] (map-indexed vector channel-data)]
+            ;TODO: Create type-1 component [grid-header /] for this
+            [:text {:left (-> channel-idx  (+ 1) (* width))
+                    :key  (str "chan" channel-idx)
+                    :style (cell-style section-idx)
+                    :content channel}])
+          ; Sections (vertical list)
+          (for [[section-idx section] (map-indexed vector section-data)]
+            ;TODO: Create type-1 component [section-row /] for this
+            [:box { :top (+ 1 section-idx)
+                    :height 1
+                    :style (cell-style section-idx)
+                    :key (str "section" idx)}
+              [:text {:key (str "section" idx "-title") 
+                      :style (cell-style section-idx)
+                      :content (:name section)}]
+               
+              
+              ; Section Patterns (Horizontal list)
+              (for [[pat-idx pattern] (map-indexed vector (:patterns section))]
+                ;TODO: Create type-1 component [pattern-cell /] for this
+                [:text {:left (-> pat-idx  (+ 1) (* width))
+                        :key (str "sec" section-idx "-pat" pat-idx) 
+                        :style (cell-style section-idx)
+                        :content pattern}])])]))))
+                
+              
+          
+
+(comment
+  [:listtable { :data section-data
+                    :keys "vi"
+                    :interactive true
+                    :style {:selected {:bold true :bg "magenta"}
+                            :header   {:bold true}}}])
