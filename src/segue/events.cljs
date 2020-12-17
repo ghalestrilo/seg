@@ -44,11 +44,14 @@
 (rf/reg-event-db
   :load-file
   (fn [db [_ file]]
-    (-> db
-     (assoc :file file)
-     (assoc :content (read-file file))          
-     (assoc :track-content (load-track file)))))
-
+    (let [file-data (load-track file)]
+      (-> db
+        (assoc :file file)
+        ; (assoc :content (read-file file))
+        (assoc :track-content file-data)
+        (assoc-in [:track :channels] (:channel file-data))))))
+        ;(dissoc :content))))
+     
 (rf/reg-event-db
   :update
   (fn [db [_ data]]

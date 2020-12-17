@@ -36,7 +36,7 @@
        [width 10
         row    (r/atom 0)
         grid-mode   (r/atom true)
-        players        @(rf/subscribe [:players])
+        players        @(rf/subscribe [:channels])
         sections       @(rf/subscribe [:sections])
         toggle-mode #(swap! grid-mode not)
         select-next #(swap! row (if (-> '@(rf/subscribe [:sections]) count (+ 1) (< @row)) identity inc)) ; FIXME: I have no clue if this is the best way to limit 

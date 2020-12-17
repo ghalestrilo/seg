@@ -70,13 +70,6 @@
       (r/create-element #js {})
       (render @screen)))
 
-; TODO: Regexes on file reading
-; (defn! load-file)
-; tidal
-; - player: /(p\ )"\w+"|d[1-8]/
-; - pattern modifier: /\$(\ |)\w+ .*/
-; - effect: /\#(\ |)\w+ ".*"/
-
 (defn main!
   "Main application entrypoint function. Initializes app, renders root UI view
   and initializes the re-frame app db.
