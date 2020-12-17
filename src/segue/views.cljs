@@ -179,6 +179,7 @@
   ; space: start/stop
   ; e: edit
   ; c/enter: choose section
+  ; m + idx(s): mute idxes
 
 (defn session-section-mode
   "...docstring"
@@ -196,12 +197,14 @@
         [:box
           ; Header: Channels
           (for [[channel-idx channel] (map-indexed vector channel-data)]
+            ;TODO: Create type-1 component [grid-header /] for this
             [:text {:left (-> channel-idx  (+ 1) (* width))
                     :key  (str "chan" channel-idx)
                     :style (cell-style section-idx)
                     :content channel}])
           ; Sections (vertical list)
           (for [[section-idx section] (map-indexed vector section-data)]
+            ;TODO: Create type-1 component [section-row /] for this
             [:box { :top (+ 1 section-idx)
                     :height 1
                     :style (cell-style section-idx)
@@ -213,6 +216,7 @@
               
               ; Section Patterns (Horizontal list)
               (for [[pat-idx pattern] (map-indexed vector (:patterns section))]
+                ;TODO: Create type-1 component [pattern-cell /] for this
                 [:text {:left (-> pat-idx  (+ 1) (* width))
                         :key (str "sec" section-idx "-pat" pat-idx) 
                         :style (cell-style section-idx)

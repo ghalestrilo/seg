@@ -39,7 +39,7 @@
         players        @(rf/subscribe [:players])
         sections       @(rf/subscribe [:sections])
         toggle-mode #(swap! grid-mode not)
-        select-next #(swap! row (if (= @row 10) identity inc))
+        select-next #(swap! row (if (= @row (-> sections count (or 0))) identity inc))
         select-prev #(swap! row (if (= @row 0) identity dec))
         old-players [ {:name "p1" :def "# s \"supervibe\" # gain 0.8" :patterns [ "0 0 0*2 0"]}
                       {:name "p2" :def "# s \"gretsch\" # gain 0.8"   :patterns [ "0(3,8)" "0 0" "0*4" "degrade 8 $ \"0 0\""]}]]
