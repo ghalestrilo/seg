@@ -186,33 +186,37 @@
   ; Render
   (fn [{:keys [channel-data section-data selected toggle-mode select-next select-prev]}]
     (let [selected-row selected
-          cell-style #(if (= % selected-row) {:bg "magenta"} {:bg "transparent"})]
-      (with-keys @screen {["k" "up"]    #(let [] (println "select-prev") (select-prev))
-                          ["j" "down"]  #(let [] (println "select-next") (select-next))
+          width 10
+          cell-style #(if (= % selected-row) {:bg "magenta" :fg "black"} {:bg "transparent" :fg "white"})]
+      (with-keys @screen {["k" "up"]    select-prev
+                          ["j" "down"]  select-next
                           ["l" "right"] toggle-mode
                           ["e" "enter"] #(if on-select (on-select selected-row
                                                         (println "[session-section-mode] No on-select callback!")))}
         [:box
           ; Header: Channels
           (for [[channel-idx channel] (map-indexed vector channel-data)]
-            [:text {:left (-> channel-idx  (+ 1) (* 10))
-                    :key  (str "chan" channel-idx)}
-              channel])
+            [:text {:left (-> channel-idx  (+ 1) (* width))
+                    :key  (str "chan" channel-idx)
+                    :style (cell-style section-idx)
+                    :content channel}])
           ; Sections (vertical list)
           (for [[section-idx section] (map-indexed vector section-data)]
             [:box { :top (+ 1 section-idx)
                     :height 1
                     :style (cell-style section-idx)
                     :key (str "section" idx)}
-              [:text {:key (str "section" idx "-title")
-                      :style (cell-style section-idx)}
-               (:name section)]
+              [:text {:key (str "section" idx "-title") 
+                      :style (cell-style section-idx)
+                      :content (:name section)}]
+               
               
               ; Section Patterns (Horizontal list)
               (for [[pat-idx pattern] (map-indexed vector (:patterns section))]
-                [:text {:left (-> pat-idx  (+ 1) (* 10))
-                        :key (str "sec" section-idx "-pat" pat-idx)} 
-                  pattern])])]))))
+                [:text {:left (-> pat-idx  (+ 1) (* width))
+                        :key (str "sec" section-idx "-pat" pat-idx) 
+                        :style (cell-style section-idx)
+                        :content pattern}])])]))))
                 
               
           
