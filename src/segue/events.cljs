@@ -53,7 +53,6 @@
         (assoc-in [:track :channels]   (:channel file-data))
         ;(assoc-in [:track :statements] (:block file-data))
         (assoc-in [:track :sections]   (:sections file-data)))))) ; FIXME: Rename to sections
-        ;(dissoc :content))))
      
 (rf/reg-event-db
   :update

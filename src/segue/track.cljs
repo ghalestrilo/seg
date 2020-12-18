@@ -66,6 +66,11 @@
     (filter some?)
     (into [])))
 
+(defn get-syntax-field
+  [fieldname strings]
+  (let [syntax (:tidal syntaxes)]
+    (get-matches (get fieldname syntax) strings)))
+
 (defn fassoc
   "Associate with the return of a function call on self"
   [the-map key f]
@@ -76,11 +81,15 @@
 ;        which means refactoring parse-content
 ; IDEA: Create (set-track-field) events
 ;  set :syntax before calling anything
+
+; IDEA: section-parsing algorithm:
+; 1. Build channel-pattern map (iterate section, convert strings to keywords)
+; 2. Map current channels to keywords, use keywords to retrieve map values
 (defn parse-section
   [section-text]
   (-> {}
     (assoc :definition section-text)
-    (assoc :channels)
+    ; (assoc :patterns (get-matches))
     (assoc :name "test")))
 
 (defn parse-content
