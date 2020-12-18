@@ -65,7 +65,8 @@
   [view & {:keys [opts]}]
   (mount/start)
   (rf/dispatch-sync [:init (:options opts) (size @screen)])
-  (rf/dispatch-sync [:load-file (-> opts :arguments first)])
+  (if-let [filename (-> opts :arguments first)]
+    (rf/dispatch-sync [:load-file filename]))
   (-> (r/reactify-component view)
       (r/create-element #js {})
       (render @screen)))

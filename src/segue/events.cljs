@@ -63,3 +63,13 @@
   :set
   (fn [db [_ data]]
     data))
+
+(rf/reg-event-db
+  :update-track
+  (fn [db [_ data]]
+    (assoc-in db [:track] data)))
+
+(rf/reg-event-db
+  :set-track
+  (fn [db [_ data]]
+    (assoc db :track data)))
