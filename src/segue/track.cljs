@@ -8,6 +8,12 @@
 (s/def ::filename string?)
 ;(s/def ::syntax   #{:tidal :foxdot})
 
+(def syntax-map
+  {:hs    :tidal
+   :tidal :tidal
+   :py    :foxdot})
+   
+
 (def syntaxes
   {:tidal
     { :block   #"( *).*(\n|(\1) +.*)*"
@@ -122,10 +128,10 @@
       (fassoc :sections #(->> % :section-definitions (into []) (map parse-section)))
       ;(dissoc :section-definitions)
       identity)))
-      
-  
 
 (defn load-track
   [filename]
-  (let [trackdata (-> filename read-file (parse-content :tidal))]
+  (let [extension (-> "." (string/split filename) last)
+        syntax    (-> extension keyword syntax-map)
+        trackdata (-> filename read-file (parse-content syntax))]
     trackdata))

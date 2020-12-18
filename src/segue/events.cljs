@@ -66,8 +66,8 @@
 
 (rf/reg-event-db
   :update-track
-  (fn [db [_ data]]
-    (assoc-in db [:track] data)))
+  (fn [db [_ path data]]
+    (assoc-in db (into [:track] path) data)))
 
 (rf/reg-event-db
   :set-track
