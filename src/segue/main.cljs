@@ -11,6 +11,7 @@
    [segue.events]
    [segue.resize :refer [size]]
    [segue.subs]
+   [segue.track :refer [read-file load-track]]
    [segue.views :as views]))
 
 (defn ui
@@ -66,7 +67,7 @@
   (mount/start)
   (rf/dispatch-sync [:init (:options opts) (size @screen)])
   (if-let [filename (-> opts :arguments first)]
-    (rf/dispatch-sync [:load-file filename]))
+    (load-track filename))
   (-> (r/reactify-component view)
       (r/create-element #js {})
       (render @screen)))

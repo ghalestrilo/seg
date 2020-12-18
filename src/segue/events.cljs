@@ -40,20 +40,6 @@
      :dialog/help help-messages
      :track demo-track}))
 
-; FIXME: Remove unnecessary fields
-(rf/reg-event-db
-  :load-file
-  (fn [db [_ file]]
-    (let [file-data (load-track file)]
-      (-> db
-        (assoc :file file)
-        ; (assoc :content (read-file file))
-        (assoc :track-content file-data)
-        (assoc :track {})
-        (assoc-in [:track :channels]   (:channel file-data))
-        ;(assoc-in [:track :statements] (:block file-data))
-        (assoc-in [:track :sections]   (:sections file-data)))))) ; FIXME: Rename to sections
-     
 (rf/reg-event-db
   :update
   (fn [db [_ data]]

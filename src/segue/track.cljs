@@ -1,6 +1,7 @@
 (ns segue.track
   (:require
     [cljs.nodejs :as nodejs]
+    [re-frame.core :as rf]
     [clojure.spec.alpha :as s]
     [clojure.string :as string]))
 
@@ -61,8 +62,12 @@
   (node-slurp filename))
 
 (defn get-track-field
-  [content syntax-def fieldname]
-  (-> syntax-def fieldname (re-seq content)))
+  [content syntax-def fieldname & all]
+  (let [db @(rf/subscribe [:db])
+        syntax-name (:syntax db)
+        syntax-def2 (get syntaxes syntax-name)]
+    (println syntax-name)
+    (-> syntax-def fieldname (re-seq content))))
   
 (defn get-matches
   ""
@@ -103,10 +108,11 @@
 (defn parse-section
   [section-text]
   (-> {}
-    (assoc :definition section-text)
+    ;(assoc :definition section-text)
     ; (assoc :patterns (get-matches))
     (assoc :name (get-section-name section-text))))
 
+; FIXME: This code is hideous
 (defn parse-content
   [content & {:keys [syntax]}]
   (let [regexes (:tidal syntaxes)
@@ -115,6 +121,8 @@
       (assoc-track-field :channel)
       (update-in [:channel] #(-> % flatten distinct)) ; filter duplicate channels
       (assoc-track-field :block)
+      (fassoc :channels :channel)
+      (dissoc :channel)
 
       ; FIXME: This is a workaround for an incorrect regex
       (fassoc :section-definitions
@@ -126,12 +134,25 @@
       ;(#(assoc % :sections (:section-definitions %)))
       (dissoc :block)
       (fassoc :sections #(->> % :section-definitions (into []) (map parse-section)))
-      ;(dissoc :section-definitions)
+      (dissoc :section-definitions)
       identity)))
+
+
+(defn state-assoc
+  [key value]
+  (rf/dispatch-sync [:update {key value}]))
+  
+(defn update-track
+  [key value]
+  (rf/dispatch-sync [:update-track {key value}]))
 
 (defn load-track
   [filename]
-  (let [extension (-> "." (string/split filename) last)
-        syntax    (-> extension keyword syntax-map)
-        trackdata (-> filename read-file (parse-content syntax))]
-    trackdata))
+  (let [extension (->> "." (string/split filename) last)
+        syntax    (-> extension keyword syntax-map)]
+    ;(rf/dispatch-sync [:set-track] {})
+    (state-assoc :syntax extension)
+    (update-track :syntax syntax)
+    (state-assoc :file filename)
+    (state-assoc :track (-> filename read-file (parse-content syntax)))))
+    
