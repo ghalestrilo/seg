@@ -16,7 +16,8 @@
       :channel-command #"( +)p( |)\"(.|\n\1( +))*"
       ;:section #"do(\n|^).*?(?=\n|$)"
       ;:section #"do\n(\s)(.*\n\1)*.*"
-      :section #"do\n( +)?(.*\n( +).*)*"}})
+      :section #"do\n( +)?(.*\n( +).*)*"
+      :section-name #"(?<=-- @name( ))\w+"}})
       
 
 ; 1. Set syntax to state
@@ -85,18 +86,24 @@
 ; IDEA: section-parsing algorithm:
 ; 1. Build channel-pattern map (iterate section, convert strings to keywords)
 ; 2. Map current channels to keywords, use keywords to retrieve map values
+
+(defn get-section-name
+  [text]
+  (-> #"(?<=-- @name( ))\w+"
+      (re-find text)
+      first
+      (or "?")))
+
 (defn parse-section
   [section-text]
   (-> {}
     (assoc :definition section-text)
     ; (assoc :patterns (get-matches))
-    (assoc :name "test")))
+    (assoc :name (get-section-name section-text))))
 
 (defn parse-content
   [content & {:keys [syntax]}]
   (let [regexes (:tidal syntaxes)
-        ; get-matches #(re-seq (-> %1 regexes) %2)
-        ; get-matches #(re-seq (-> %1 regexes) %2)
         assoc-track-field #(assoc %1 %2 (get-track-field content regexes %2))]
     (-> {}
       (assoc-track-field :channel)
