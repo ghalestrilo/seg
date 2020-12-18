@@ -13,6 +13,7 @@
     { :block   #"( *).*(\n|(\1) +.*)*"
       :channel #"(?<=\sp *\")([^\".]*)|(?<=d)[1-8]"
       :pattern #"\$( |)\w+ .*"
+      :channel-command #"( +)p( |)\"(.|\n\1( +))*"
       ;:section #"do(\n|^).*?(?=\n|$)"
       ;:section #"do\n(\s)(.*\n\1)*.*"
       :section #"do\n( +)?(.*\n( +).*)*"}})
@@ -69,7 +70,18 @@
   "Associate with the return of a function call on self"
   [the-map key f]
   (assoc the-map key (f the-map)))
-  
+
+; TODO: Retrieve channels from global state array
+; NOTE:  This requires pushing to global state before calling this function.
+;        which means refactoring parse-content
+; IDEA: Create (set-track-field) events
+;  set :syntax before calling anything
+(defn parse-section
+  [section-text]
+  (-> {}
+    (assoc :definition section-text)
+    (assoc :channels)
+    (assoc :name "test")))
 
 (defn parse-content
   [content & {:keys [syntax]}]
@@ -91,7 +103,7 @@
                     flatten))
       ;(#(assoc % :sections (:section-definitions %)))
       (dissoc :block)
-      ;(fassoc :sections #(identity []))
+      (fassoc :sections #(->> % :section-definitions (into []) (map parse-section)))
       ;(dissoc :section-definitions)
       identity)))
       
