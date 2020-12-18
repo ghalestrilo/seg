@@ -1,0 +1,7 @@
+extensions:
+  - "hs"
+  - "tidal"
+regexes:
+  block: "( *).*(\n|(\1) +.*)*"
+  channel: "(?<=\sp *\")([^\".]*)|(?<=d)[1-8]"
+  pattern: "\$( |)\w+ .*"

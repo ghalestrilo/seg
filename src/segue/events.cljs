@@ -49,7 +49,10 @@
         (assoc :file file)
         ; (assoc :content (read-file file))
         (assoc :track-content file-data)
-        (assoc-in [:track :channels] (:channel file-data))))))
+        (assoc :track {})
+        (assoc-in [:track :channels]   (:channel file-data))
+        ;(assoc-in [:track :statements] (:block file-data))
+        (assoc-in [:track :extracted-sections]   (:sections file-data)))))) ; FIXME: Rename to sections
         ;(dissoc :content))))
      
 (rf/reg-event-db
