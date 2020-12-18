@@ -11,6 +11,7 @@
    [segue.events]
    [segue.resize :refer [size]]
    [segue.subs]
+   [segue.track :refer [read-file load-track]]
    [segue.views :as views]))
 
 (defn ui
@@ -65,16 +66,11 @@
   [view & {:keys [opts]}]
   (mount/start)
   (rf/dispatch-sync [:init (:options opts) (size @screen)])
+  (if-let [filename (-> opts :arguments first)]
+    (load-track filename))
   (-> (r/reactify-component view)
       (r/create-element #js {})
       (render @screen)))
-
-; TODO: Regexes on file reading
-; (defn! load-file)
-; tidal
-; - player: /(p\ )"\w+"|d[1-8]/
-; - pattern modifier: /\$(\ |)\w+ .*/
-; - effect: /\#(\ |)\w+ ".*"/
 
 (defn main!
   "Main application entrypoint function. Initializes app, renders root UI view

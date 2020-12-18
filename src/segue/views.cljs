@@ -3,10 +3,7 @@
   (:require
    [reagent.core :as r]
    [segue.core :refer [screen]]
-   [cljs.nodejs :as node :refer [require]]
    [segue.keys :refer [with-keys]]))
-
-(def blessed (node/require "blessed"))
 
 
 (defn router

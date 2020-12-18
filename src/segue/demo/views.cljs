@@ -36,10 +36,10 @@
        [width 10
         row    (r/atom 0)
         grid-mode   (r/atom true)
-        players        @(rf/subscribe [:players])
+        players        @(rf/subscribe [:channels])
         sections       @(rf/subscribe [:sections])
         toggle-mode #(swap! grid-mode not)
-        select-next #(swap! row (if (-> '@(rf/subscribe [:sections]) count (+ 1) (< @row)) identity inc)) ; FIXME: I have no clue if this is the best way to limit 
+        select-next #(swap! row (if (-> (rf/subscribe [:sections]) deref count (+ 1) (< @row)) identity inc)) ; FIXME: I have no clue if this is the best way to limit 
         select-prev #(swap! row (if (= @row 0) identity dec))
         old-players [ {:name "p1" :def "# s \"supervibe\" # gain 0.8" :patterns [ "0 0 0*2 0"]}
                       {:name "p2" :def "# s \"gretsch\" # gain 0.8"   :patterns [ "0(3,8)" "0 0" "0*4" "degrade 8 $ \"0 0\""]}]]

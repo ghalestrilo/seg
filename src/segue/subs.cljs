@@ -32,9 +32,9 @@
     (:track db)))
 
 (rf/reg-sub
-  :players
+  :channels
   (fn [db _]
-    (-> db :track :players)))
+    (-> db :track :channels)))
 
 (rf/reg-sub
   :sections
