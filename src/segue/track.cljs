@@ -18,6 +18,8 @@
       :section #"do\n( +)?(.*\n( +).*)*"}})
       
 
+; 1. Set syntax to state
+; 2. Functions subscribe to state in order to get syntax
 
 
 
@@ -55,18 +57,13 @@
   (-> syntax-def fieldname (re-seq content)))
   
 (defn get-matches
+  ""
   [regex strings]
-  ;(filter #(some? (re-matches regex %)) strings)
   (->> strings
-    ;(map #(join "\n" %))
     (map first)
     (map #(re-find regex %))
     (filter some?)
     (into [])))
-  ;(println regex))
-  ;(->> strings first str println))
-  ;(->> strings first str (re-seq regex)))
-  ;strings)
 
 (defn fassoc
   "Associate with the return of a function call on self"
