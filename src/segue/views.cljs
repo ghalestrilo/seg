@@ -192,7 +192,7 @@
   highlighted: bool | Whether or not to highlight the text
   "
   [{:keys [content active highlighted left right top]}]
-  (let [highlight (if highlighted {:bg "magenta" :fg "black"} {:bg "transparent" :fg "white"})]
+  (let [highlight (if highlighted { :bg "magenta" :fg "black" } { :bg "transparent" :fg "white"})]
     [:box (merge highlight { :height 1 :left left :top top})
       [:text (->> highlight
                   (merge {:bold active})
@@ -208,6 +208,9 @@
     active      bool
     highlighted bool
   2. Section data:
+    key          str
+    name         str
+    patterns     str
   "
   [{:keys [active top cell-width highlighted]} {:keys [key name patterns]}]
   [:box { :top top
@@ -241,13 +244,8 @@
                           ["l" "right"] toggle-mode
                           ["e" "enter"] #(if on-select (on-select) (println "[session-section-mode] No on-select callback!"))}
         [:box
-          ; Header: Channels
-          (for [[channel-idx channel] (map-indexed vector channel-data)]
-            ;TODO: Create type-1 component [grid-header /] for this
-            [text-cell {:left (-> channel-idx (+ 1) (* width))
-                        :key  (str "chan" channel-idx)
-                        :highlighted
-                        :content channel}])
+          [section-row {:key "header"}
+                       {:patterns channel-data}]
           ; Sections       (vertical list)
           (for [[section-idx section] (map-indexed vector section-data)]
             [section-row {:highlighted (= section-idx selected-row)
