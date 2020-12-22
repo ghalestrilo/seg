@@ -59,3 +59,9 @@
   :set-track
   (fn [db [_ data]]
     (assoc db :track data)))
+
+(rf/reg-event-db
+  :play-pattern
+  (fn [db [_ row column]]
+    (println "playing" row column)
+    (assoc db :playing [])))

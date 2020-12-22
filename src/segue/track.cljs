@@ -112,7 +112,7 @@
     ; (assoc :patterns (get-matches))
     (assoc :name (get-section-name section-text))))
 
-; FIXME: This code is hideous
+;; FIXME: This code is hideous
 (defn parse-content
   [content & {:keys [syntax]}]
   (let [regexes (:tidal syntaxes)
@@ -148,7 +148,7 @@
 
 (defn load-track
   [filename]
-  (let [extension (->> "." (string/split filename) last)
+  (let [extension (-> filename (string/split ".") last)
         syntax    (-> extension keyword syntax-map)]
     ;(rf/dispatch-sync [:set-track] {})
     (state-assoc :syntax extension)

@@ -180,17 +180,16 @@
 
 (defn session-section-mode
   "...docstring"
-  [{:keys [channel-data section-data selected toggle-mode select-next select-prev]}]
+  [{:keys [channel-data section-data selected toggle-mode select-next select-prev on-select playback-data]}]
   ; Render
-  (fn [{:keys [channel-data section-data selected toggle-mode select-next select-prev]}]
+  (fn [{:keys [channel-data section-data selected toggle-mode select-next select-prev play-pattern on-select playback-data]}]
     (let [selected-row selected
           width 10
           cell-style #(if (= % selected-row) {:bg "magenta" :fg "black"} {:bg "transparent" :fg "white"})]
       (with-keys @screen {["k" "up"]    select-prev
                           ["j" "down"]  select-next
                           ["l" "right"] toggle-mode
-                          ["e" "enter"] #(if on-select (on-select selected-row
-                                                        (println "[session-section-mode] No on-select callback!")))}
+                          ["e" "enter"] #(if on-select (on-select) (println "[session-section-mode] No on-select callback!"))}
         [:box
           ; Header: Channels
           (for [[channel-idx channel] (map-indexed vector channel-data)]
@@ -209,14 +208,13 @@
               [:text {:key (str "section" idx "-title") 
                       :style (cell-style section-idx)
                       :content (:name section)}]
-               
-              
+
               ; Section Patterns (Horizontal list)
               (for [[pat-idx pattern] (map-indexed vector (:patterns section))]
                 ;TODO: Create type-1 component [pattern-cell /] for this
                 [:text {:left (-> pat-idx  (+ 1) (* width))
                         :key (str "sec" section-idx "-pat" pat-idx) 
-                        :style (cell-style section-idx)
+                        :style (merge (cell-style section-idx))
                         :content pattern}])])]))))
                 
               
