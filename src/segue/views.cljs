@@ -180,6 +180,7 @@
 
 
 
+; FIXME: "active" does not update. why? (always false/nil)
 (defn text-cell
   "Wrapper for text, which can be styled through high-level props
   content:      str | The text that will be rendered
@@ -187,13 +188,12 @@
   highlighted: bool | Whether or not to highlight the text
   "
   [{:keys [content active highlighted left right top]}]
-  (fn [{:keys [content active highlighted left right top]}]
-    (let [highlight (if highlighted { :bg "magenta" :fg "black" } { :bg "transparent" :fg "white"})]
-      [:box (merge {:style highlight} { :height 1 :left left :top top})
-        [:text (->> highlight
-                    (merge {:bold active})
-                    (array-map :style)
-                    (merge {:content content}))]])))
+  (let [highlight (if highlighted { :bg "magenta" :fg "black" } { :bg "transparent" :fg "white"})]
+    [:box (merge {:style highlight} { :height 1 :left left :top top})
+      [:text (->> highlight
+                  (merge {:bold active})
+                  (array-map :style)
+                  (merge {:content content}))]]))
 
 (defn section-row
   "Displays a track section as a named row of patterns
@@ -215,7 +215,7 @@
       [text-cell {:key (str "section" idx "-title") 
                   :content name
                   :highlighted highlighted
-                  :active active}]
+                  :is-active active}]
       ; Section Patterns (Horizontal list)
       (for [[pat-idx pattern] (map-indexed vector patterns)]
         [text-cell
@@ -229,10 +229,9 @@
   [{:keys [channel-data section-data playback-data selected on-select
            toggle-mode select-next select-prev play-pattern]}]
   ; Render
-
   (let [selected-row selected
-          active-section (:section @playback-data) ; FIXME: Move to state
-          width 10]
+        active-section (-> @playback-data :section)
+        width 10]
       (with-keys @screen {["k" "up"]    select-prev
                           ["j" "down"]  select-next
                           ["l" "right"] toggle-mode
@@ -244,5 +243,5 @@
             [section-row {:highlighted (= section-idx selected-row)
                           :key (str "section" number)
                           :top (inc section-idx)
-                          :active (= section-idx active-section)}
-                        section])])))
+                          :active (= active-section section-idx)}
+                      section])])))
