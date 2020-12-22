@@ -178,14 +178,64 @@
   ; c/enter: choose section
   ; m + idx(s): mute idxes
 
+
+
+
+; TODO: I am creating this component to provide visual feedback while simplifying session-section-mode
+; 1. document component
+; 2. finish its stile mapping
+; 3. use it in session-section-mode
+(defn text-cell
+  "Wrapper for text, which can be styled through high-level props
+  content:      str | The text that will be rendered
+  active:      bool | Whether or not to bold the text
+  highlighted: bool | Whether or not to highlight the text
+  "
+  [{:keys [content active highlighted left right top]}]
+  (let [highlight (if highlighted {:bg "magenta" :fg "black"} {:bg "transparent" :fg "white"})]
+    [:box (merge highlight { :height 1 :left left :top top})
+      [:text (->> highlight
+                  (merge {:bold active})
+                  (array-map :style)
+                  (merge {:content content}))]]))
+
+(defn section-row
+  "Displays a track section as a named row of patterns
+  Receives two maps:
+  1. Display data:
+    top          int
+    cell-width   int
+    active      bool
+    highlighted bool
+  2. Section data:
+  "
+  [{:keys [active top cell-width highlighted]} {:keys [key name patterns]}]
+  [:box { :top top
+          :key key
+          :width "100%"}
+    [text-cell {:key (str "section" idx "-title") 
+                :content name
+                :highlighted highlighted
+                :active active}]
+    ; Section Patterns (Horizontal list)
+    (for [[pat-idx pattern] (map-indexed vector patterns)]
+      [text-cell
+        {:key (str "sec" section-idx "-pat" pat-idx) 
+          :highlighted highlighted
+          :left (-> pat-idx inc (*  10))
+          :content pattern}])])
+    
+  
+          
+
 (defn session-section-mode
   "...docstring"
   [{:keys [channel-data section-data selected toggle-mode select-next select-prev on-select playback-data]}]
   ; Render
   (fn [{:keys [channel-data section-data selected toggle-mode select-next select-prev play-pattern on-select playback-data]}]
     (let [selected-row selected
-          width 10
-          cell-style #(if (= % selected-row) {:bg "magenta" :fg "black"} {:bg "transparent" :fg "white"})]
+          active-section 2 ; FIXME: Move to state
+          width 10]
       (with-keys @screen {["k" "up"]    select-prev
                           ["j" "down"]  select-next
                           ["l" "right"] toggle-mode
@@ -194,31 +244,17 @@
           ; Header: Channels
           (for [[channel-idx channel] (map-indexed vector channel-data)]
             ;TODO: Create type-1 component [grid-header /] for this
-            [:text {:left (-> channel-idx  (+ 1) (* width))
-                    :key  (str "chan" channel-idx)
-                    :style (cell-style section-idx)
-                    :content channel}])
-          ; Sections (vertical list)
+            [text-cell {:left (-> channel-idx (+ 1) (* width))
+                        :key  (str "chan" channel-idx)
+                        :highlighted
+                        :content channel}])
+          ; Sections       (vertical list)
           (for [[section-idx section] (map-indexed vector section-data)]
-            ;TODO: Create type-1 component [section-row /] for this
-            [:box { :top (+ 1 section-idx)
-                    :height 1
-                    :style (cell-style section-idx)
-                    :key (str "section" idx)}
-              [:text {:key (str "section" idx "-title") 
-                      :style (cell-style section-idx)
-                      :content (:name section)}]
-
-              ; Section Patterns (Horizontal list)
-              (for [[pat-idx pattern] (map-indexed vector (:patterns section))]
-                ;TODO: Create type-1 component [pattern-cell /] for this
-                [:text {:left (-> pat-idx  (+ 1) (* width))
-                        :key (str "sec" section-idx "-pat" pat-idx) 
-                        :style (merge (cell-style section-idx))
-                        :content pattern}])])]))))
-                
-              
-          
+            [section-row {:highlighted (= section-idx selected-row)
+                          :key (str "section" number)
+                          :top (inc section-idx)
+                          :active (= section-idx active-section)}
+                        section])]))))
 
 (comment
   [:listtable { :data section-data
