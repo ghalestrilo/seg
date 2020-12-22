@@ -227,9 +227,6 @@
           :highlighted highlighted
           :left (-> pat-idx inc (*  10))
           :content pattern}])])
-    
-  
-          
 
 (defn session-section-mode
   "...docstring"
