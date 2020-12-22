@@ -74,8 +74,8 @@
 
 
 
-(defn demo
-  "Main demo UI wrapper.
+(defn home
+  "Main wrapper.
 
   Takes a hash-map and a hiccup child vector:
 

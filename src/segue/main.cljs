@@ -7,7 +7,7 @@
    [re-frame.core :as rf]
    [reagent.core :as r]
    [segue.core :refer [render screen]]
-   [segue.demo.views :refer [demo]]
+   [segue.demo.views :refer [home]]
    [segue.events]
    [segue.resize :refer [size]]
    [segue.subs]
@@ -17,10 +17,10 @@
 (defn ui
   "Root ui view.
   Takes no arguments.
-  Returns hiccup demo element to run the demo app."
+  Returns hiccup home element to run the home app."
   [_]
   (let [view @(rf/subscribe [:view])]
-    [demo {:view view}]))
+    [home {:view view}]))
 
 ; (defn ui
 ;   "Basic wrapper to show the demo app and the debug view half height.

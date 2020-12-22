@@ -4,16 +4,16 @@
    [reagent.core :as r]
    [segue.core :refer [render screen]]
    [segue.debug.views :as debug]
-   [segue.demo.views :refer [demo]]
+   [segue.demo.views :refer [home]]
    [segue.main :as main]))
 
 (defn ui
-  "Basic wrapper to show the demo app and the debug view half height.
+  "Basic wrapper to show the home and the debug view half height.
   Returns hiccup vector."
   [_]
   (let [view @(rf/subscribe [:view])
         rows (:rows @(rf/subscribe [:size]))]
-    [demo
+    [home
      {:view view}
      [debug/debug-box rows]]))
 
