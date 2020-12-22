@@ -64,4 +64,5 @@
   :play-pattern
   (fn [db [_ row column]]
     (println "playing" row column)
-    (assoc db :playing [])))
+    (assoc db :playback {:section row
+                         :patterns (-> db :track :channels count (take (repeat row)))})))
