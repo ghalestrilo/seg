@@ -189,7 +189,7 @@
   [{:keys [content active highlighted left right top]}]
   (fn [{:keys [content active highlighted left right top]}]
     (let [highlight (if highlighted { :bg "magenta" :fg "black" } { :bg "transparent" :fg "white"})]
-      [:box (merge highlight { :height 1 :left left :top top})
+      [:box (merge {:style highlight} { :height 1 :left left :top top})
         [:text (->> highlight
                     (merge {:bold active})
                     (array-map :style)
@@ -209,8 +209,7 @@
     patterns     str | List of patterns which the section will match to the channels
   "
   [{:keys [active top cell-width highlighted]} {:keys [key name patterns]}]
-  (fn [{:keys [active top cell-width highlighted]} {:keys [key name patterns]}]
-    [:box { :top top
+  [:box { :top top
             :key key
             :width "100%"}
       [text-cell {:key (str "section" idx "-title") 
@@ -223,17 +222,16 @@
           {:key (str "sec" section-idx "-pat" pat-idx) 
             :highlighted highlighted
             :left (-> pat-idx inc (* 10))
-            :content pattern}])]))
+            :content pattern}])])
 
 (defn session-section-mode
   "...docstring"
-  [{:keys [channel-data section-data selected on-select playback-data
+  [{:keys [channel-data section-data playback-data selected on-select
            toggle-mode select-next select-prev play-pattern]}]
   ; Render
-  (fn [{:keys [channel-data section-data selected on-select playback-data
-               toggle-mode select-next select-prev play-pattern]}]
-    (let [selected-row selected
-          active-section (:section playback-data) ; FIXME: Move to state
+
+  (let [selected-row selected
+          active-section (:section @playback-data) ; FIXME: Move to state
           width 10]
       (with-keys @screen {["k" "up"]    select-prev
                           ["j" "down"]  select-next
@@ -241,10 +239,10 @@
                           ["e" "enter"] #(if on-select (on-select) (println "[session-section-mode] No on-select callback!"))}
         [:box
           [section-row {:key "header"}
-                       {:patterns channel-data}]
-          (for [[section-idx section] (map-indexed vector section-data)]
-              [section-row {:highlighted (= section-idx selected-row)
-                            :key (str "section" number)
-                            :top (inc section-idx)
-                            :active (= section-idx active-section)}
-                          section])]))))
+                       {:patterns @channel-data}]
+          (for [[section-idx section] (map-indexed vector @section-data)]
+            [section-row {:highlighted (= section-idx selected-row)
+                          :key (str "section" number)
+                          :top (inc section-idx)
+                          :active (= section-idx active-section)}
+                        section])])))

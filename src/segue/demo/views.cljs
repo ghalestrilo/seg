@@ -39,9 +39,9 @@
        [width 10
         row         (r/atom 0)
         grid-mode   (r/atom true)
-        channels       @(rf/subscribe [:channels])
-        sections       @(rf/subscribe [:sections])
-        playback-data  @(rf/subscribe [:db :playback])
+        channels       (rf/subscribe [:channels])
+        sections       (rf/subscribe [:sections])
+        playback-data  (rf/subscribe [:db :playback])
         play-pattern   #(rf/dispatch  [:play-pattern @row %2])
         toggle-mode #(swap! grid-mode not)
         select-next #(swap! row (if (-> (rf/subscribe [:sections]) deref count (+ 1) (< @row)) identity inc)) ; FIXME: I have no clue if this is the best way to limit 
@@ -62,7 +62,7 @@
                   :select-next select-next
                   :select-prev select-prev
                   ; :on-select  #(for [[idx channel] (map-indexed vector channels)] (do (println "playing" idx) (play-pattern % idx)))
-                  :on-select  #(doall (for [[idx channel] (map-indexed vector channels)] (play-pattern % idx)))
+                  :on-select  #(doall (for [[idx channel] (map-indexed vector @channels)] (play-pattern % idx)))
                   :section-data  sections
                   :channel-data  channels
                   :playback-data playback-data
