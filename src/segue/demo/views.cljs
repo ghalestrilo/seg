@@ -30,11 +30,14 @@
 
 ; (def grid-mode (r/atom true)) ; FIXME: why does this not work inside let?
 
+; (def s< (comp deref re-frame.core/subscribe))
+; (def s> re-frame.core/dispatch)
+
 (defn session
   [_]
   (r/with-let
        [width 10
-        row    (r/atom 0)
+        row         (r/atom 0)
         grid-mode   (r/atom true)
         channels       @(rf/subscribe [:channels])
         sections       @(rf/subscribe [:sections])
@@ -60,8 +63,8 @@
                   :select-prev select-prev
                   ; :on-select  #(for [[idx channel] (map-indexed vector channels)] (do (println "playing" idx) (play-pattern % idx)))
                   :on-select  #(doall (for [[idx channel] (map-indexed vector channels)] (play-pattern % idx)))
-                  :section-data sections
-                  :channel-data channels
+                  :section-data  sections
+                  :channel-data  channels
                   :playback-data playback-data
                   :selected    @row}]
             [player-grid
