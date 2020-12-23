@@ -5,7 +5,8 @@
    [re-frame.core :as rf]
    [reagent.core :as r]
    [segue.views :refer [router vertical-menu player-grid session-section-mode]]
-   [segue.components :refer [help]]))
+   [segue.components :refer [help]]
+   [segue.repl :refer [repl]]))
 
 (defn navbar
   "Displays a blessed js box with a vertical-menu used for navigation.
@@ -41,7 +42,7 @@
         grid-mode   (r/atom true)
         channels       (rf/subscribe [:channels])
         sections       (rf/subscribe [:sections])
-        playback-data  (rf/subscribe [:db :playback])
+        playback-data  (rf/subscribe [:playback])
         play-pattern   #(rf/dispatch  [:play-pattern @row %2])
         toggle-mode #(swap! grid-mode not)
         select-next #(swap! row (if (-> (rf/subscribe [:sections]) deref count (+ 1) (< @row)) identity inc)) ; FIXME: I have no clue if this is the best way to limit 
@@ -65,7 +66,7 @@
                   :on-select  #(doall (for [[idx channel] (map-indexed vector @channels)] (play-pattern % idx)))
                   :section-data  sections
                   :channel-data  channels
-                  :playback-data playback-data
+                  :playback playback-data
                   :selected    @row}]
             [player-grid
               {:options old-channels
@@ -91,11 +92,12 @@
               :right  0
               :width  "100%"
               :height "100%"}
-   (when (not= view :loader) [navbar])
-   [router {:key "2"
-            :views {:home session}
-            :view view}]
-   [help {:key "1" :items
-                      ["up/down - choose pattern"
-                       "left/right - choose player"]}]
-   child])
+    ;(when (not= view :loader) [navbar])
+    [router {:key "2"
+             :views {:home session}
+             :view view}]
+    [repl]
+    [help {:key "1" :items
+                       ["up/down - choose pattern"
+                        "left/right - choose player"]}]
+    child])

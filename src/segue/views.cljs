@@ -215,7 +215,7 @@
       [text-cell {:key (str "section" idx "-title") 
                   :content name
                   :highlighted highlighted
-                  :is-active active}]
+                  :active active}]
       ; Section Patterns (Horizontal list)
       (for [[pat-idx pattern] (map-indexed vector patterns)]
         [text-cell
@@ -226,11 +226,10 @@
 
 (defn session-section-mode
   "...docstring"
-  [{:keys [channel-data section-data playback-data selected on-select
+  [{:keys [channel-data section-data playback selected on-select
            toggle-mode select-next select-prev play-pattern]}]
   ; Render
   (let [selected-row selected
-        active-section (-> @playback-data :section)
         width 10]
       (with-keys @screen {["k" "up"]    select-prev
                           ["j" "down"]  select-next
@@ -239,9 +238,11 @@
         [:box
           [section-row {:key "header"}
                        {:patterns @channel-data}]
-          (for [[section-idx section] (map-indexed vector @section-data)]
-            [section-row {:highlighted (= section-idx selected-row)
-                          :key (str "section" number)
-                          :top (inc section-idx)
-                          :active (= active-section section-idx)}
-                      section])])))
+          (println active-session)
+          (doall
+            (for [[section-idx section] (map-indexed vector @section-data)]
+              [section-row {:highlighted (= section-idx selected-row)
+                            :key (str "section" number)
+                            :top (inc section-idx)
+                            :active (-> @playback :section (= section-idx))}
+                        section]))])))

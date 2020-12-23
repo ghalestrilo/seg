@@ -40,3 +40,8 @@
   :sections
   (fn [db _]
     (-> db :track :sections)))
+
+(rf/reg-sub
+  :playback
+  (fn [db _]
+    (-> db :playback)))
