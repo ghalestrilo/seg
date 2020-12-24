@@ -49,7 +49,7 @@
               ;(reset! content (.toString v "UTF8"))
               (recur))))))
     (let [proc @(rf/subscribe [:repl])
-          ;{:keys [process messages]} @(rf/subscribe [:repl])
+          repl-data @(rf/subscribe [:repl])
           dummy-proc (spawn-process command)]
       ;(.on (.-stdout proc) "data" #(reset! content (str %)))
       
@@ -57,7 +57,11 @@
     ;  (.on (.-stderr proc) "data"  #(put! channel %))
     ;  (.on proc "close" #(put! channel [:done %])))
       (fn [_]
-        [:text {:bold true :content @content}]))))
+        [:box
+          (doall
+            (for [message (:messages repl-data)]
+              [:text {:bold true :content message}]))]))))
+        ;[:text {:bold true :content (-> repl-data :messages first)}]))))
 
 
 ;"ghci -ghci-script /home/ghales/git/libtidal/boot.tidal"
