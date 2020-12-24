@@ -87,9 +87,8 @@
 
 (rf/reg-event-db
   :repl-start
-  (fn [db [_]]
-    (let [command "echo \"hello state!\""
-          proc (spawn-process command)] ;FIXME: Should read from plugin
-      ; (.on (.-stdout proc) "data" #(reset! content (str %))
+  (fn [db [_ command]]
+    (let [proc (spawn-process command)] ;FIXME: Should read from plugin
+      (.on (.-stdout proc) "data" #(rf/dispatch-sync [:repl-update-message (str %)] (str %)))
       (assoc-in db [:repl :process] proc)))) 
         

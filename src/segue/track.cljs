@@ -157,6 +157,5 @@
     (state-assoc :file filename)
     (state-assoc :track (-> filename read-file (parse-content syntax)))
     ; TODO: Start process here with plugin boot command
-    (rf/dispatch-sync [:repl-start] {})
-    (rf/dispatch-sync [:repl-update-message "hahahah"])))  ;FIXME: Remove this
+    (rf/dispatch-sync [:repl-start "echo doing && sleep 2 && echo done"])))
 

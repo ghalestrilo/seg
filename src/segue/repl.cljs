@@ -58,6 +58,7 @@
     ;  (.on proc "close" #(put! channel [:done %])))
       (fn [_]
         [:box
+          [:text {:bold true :content (-> repl-data :messages first)}]
           (doall
             (for [message (:messages repl-data)]
               [:text {:bold true :content message}]))]))))
