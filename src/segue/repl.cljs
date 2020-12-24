@@ -35,7 +35,7 @@
         messages (r/atom [])
         command "echo \"hello sailor!\""]
         ;command "ghci -ghci-script /home/ghales/git/libtidal/boot.tidal"]
-    (.on js/process "exit" #())
+    (.on js/process "exit" #()) ; #(.kill proc "SIGINT")
     (comment
       ; NOTE: go-loop should be at same logical level as the (let) below
       (go-loop []
@@ -50,17 +50,16 @@
               (recur))))))
     (let [proc (-> (rf/subscribe [:repl]) :process)
           dummy-proc (spawn-process command)]
-      (.on (.-stdout dummy-proc) "data" #(reset! content (str %)))
+      ;(.on (.-stdout proc) "data" #(reset! content (str %)))
       
       ; (.on (.-stdout proc) "data"  #(put! channel %)) ; FIXME: Once the async loop is fixed, use this
-
     ;  (.on (.-stderr proc) "data"  #(put! channel %))
     ;  (.on proc "close" #(put! channel [:done %])))
       (fn [_]
         [:text {:bold true :content @content}]))))
 
 
-"ghci -ghci-script /home/ghales/git/libtidal/boot.tidal"
+;"ghci -ghci-script /home/ghales/git/libtidal/boot.tidal"
 
 ; In the future, we want 2 running behaviors:
 ; standalone: default behavior, spawns and manages processes
