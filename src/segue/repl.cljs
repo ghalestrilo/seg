@@ -10,8 +10,10 @@
   "Takes a command, starts a node process with that command inside user-configured terminal
    and returns the process"
   [command]
-  (let [term "zsh"] ; FIXME: Should be user preference
-    (spawn term (clj->js ["-c" command]))))
+  (let [term "zsh" ; FIXME: Should be user preference
+        proc (spawn term (clj->js ["-c" command]))]
+    (.on js/process "exit" #(.kill proc "SIGINT")) ; #(.kill proc "SIGINT")
+    proc))
 
 (defn done-message? [message]
   (and
@@ -35,7 +37,6 @@
         messages (r/atom [])
         command "echo \"hello sailor!\""]
         ;command "ghci -ghci-script /home/ghales/git/libtidal/boot.tidal"]
-    (.on js/process "exit" #()) ; #(.kill proc "SIGINT")
     (comment
       ; NOTE: go-loop should be at same logical level as the (let) below
       (go-loop []

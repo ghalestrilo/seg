@@ -24,7 +24,8 @@
       ;:section #"do(\n|^).*?(?=\n|$)"
       ;:section #"do\n(\s)(.*\n\1)*.*"
       :section #"do\n( +)?(.*\n( +).*)*"
-      :section-name #"(?<=-- @name( ))\w+"}})
+      :section-name #"(?<=-- @name( ))\w+"
+      :boot "ghci -ghci-script /home/ghales/git/libtidal/boot.tidal"}})
       
 
 ; 1. Set syntax to state
@@ -157,5 +158,6 @@
     (state-assoc :file filename)
     (state-assoc :track (-> filename read-file (parse-content syntax)))
     ; TODO: Start process here with plugin boot command
-    (rf/dispatch-sync [:repl-start "echo doing && sleep 2 && echo done"])))
+    ;(rf/dispatch-sync [:repl-start "echo doing && sleep 2 && echo done"])
+    (rf/dispatch-sync [:repl-start "ghci -ghci-script /home/ghales/git/libtidal/boot.tidal"])))
 
