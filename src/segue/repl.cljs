@@ -17,7 +17,8 @@
         content (r/atom "hello")
         restart #(println "time to restart the repl")
         channel (chan)
-        command "echo 1 && sleep 1 && echo 2 && sleep 1 && echo 3"]
+        messages (r/atom [])
+        command "ghci -ghci-script /home/ghales/git/libtidal/boot.tidal"]
     (go-loop []
       (let [v (<! channel)]
         (if (done-message? v)
@@ -27,9 +28,9 @@
           (do
             (println (.toString v "UTF8"))
             (recur)))))
-            ; test
-    (let [proc (spawn "bash" (clj->js ["-c" command]))]
+    (let [proc (spawn "zsh" (clj->js ["-c" command]))]
       (.on (.-stdout proc) "data" #(do (println %) (reset! content (str %))))
+      
     ;  (.on (.-stdout proc) "data"  #(put! channel %))
     ;  (.on (.-stderr proc) "data"  #(put! channel %))
     ;  (.on proc "close" #(put! channel [:done %])))

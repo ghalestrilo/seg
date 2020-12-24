@@ -96,7 +96,11 @@
     [router {:key "2"
              :views {:home session}
              :view view}]
-    [repl]
+    [:box { :bottom 0
+            :height "80%"
+            :style {:border { :fg :magenta}}
+            :border {:type :line}}
+      [repl]]
     [help {:key "1" :items
                        ["up/down - choose pattern"
                         "left/right - choose player"]}]
