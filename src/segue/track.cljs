@@ -156,3 +156,4 @@
     (update-track :syntax syntax)
     (state-assoc :file filename)
     (state-assoc :track (-> filename read-file (parse-content syntax)))))
+    ; TODO: Start process here with plugin boot command

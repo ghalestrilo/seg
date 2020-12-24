@@ -72,12 +72,13 @@
 (rf/reg-event-db
   :repl-kill
   (fn [db [_]]
-    (if (:repl db)
-        (do (println "killing current process")))))
+    (if-let [{:keys [repl]} db]
+        (do (println "killing current process")
+            (-> repl :process (.kill "SIGINT"))))))
 
 (rf/reg-event-db
   :repl-start
   (fn [db [_]]
     (let [command "echo \"hello state!\""] ;FIXME: Should read from plugin
       (assoc-in db [:repl :process] 
-        (spawn-process commandd)))))
+        (spawn-process command)))))
