@@ -48,7 +48,8 @@
               ;(println (.toString v "UTF8"))
               ;(reset! content (.toString v "UTF8"))
               (recur))))))
-    (let [proc (-> (rf/subscribe [:repl]) :process)
+    (let [proc @(rf/subscribe [:repl])
+          ;{:keys [process messages]} @(rf/subscribe [:repl])
           dummy-proc (spawn-process command)]
       ;(.on (.-stdout proc) "data" #(reset! content (str %)))
       

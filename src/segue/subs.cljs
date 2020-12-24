@@ -50,4 +50,4 @@
 (rf/reg-sub
   :repl
   (fn [db _]
-    (-> db :repl)))
+    (-> db :repl (or {:process nil :messages []}))))

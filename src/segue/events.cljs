@@ -74,7 +74,16 @@
   (fn [db [_]]
     (if-let [{:keys [repl]} db]
         (do (println "killing current process")
-            (-> repl :process (.kill "SIGINT"))))))
+            (-> repl :process (.kill "SIGINT"))
+            (dissoc db :repl)))))
+
+(rf/reg-event-db
+  :repl-update-message
+  (fn [db [_ message]]
+    (for [i (range 1000)] (println message))
+    (update-in db [:repl :messages]
+      #(-> % (or []) (concat [message])))))
+  
 
 (rf/reg-event-db
   :repl-start
