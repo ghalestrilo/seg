@@ -19,12 +19,19 @@
     ;(.on proc "close" #(put! channel [:done %])))
     proc))
 
+
+; TODO: Does not work yet!
+(defn repl-send
+  [proc message]
+  (-> proc (.-stdin) (.write message))
+  (-> proc (.-stdin) (.write "\n")))
+
+
 (defn done-message? [message]
   (and
     (vector? message)
     (= (message 0) :done)))
 
-; FIXME: Why is repl not showing text?
 (defn repl
   [_]
   (let [repl-data @(rf/subscribe [:repl])]

@@ -5,7 +5,7 @@
   (:require
     [re-frame.core :as rf]
     [segue.track :refer [read-file load-track]]
-    [segue.repl :refer [spawn-process]]))
+    [segue.repl :refer [spawn-process repl-send]]))
 ; Below are very general effect handlers. While you can use these to get
 ; going quickly you are likely better off creating custom handlers for actions
 ; specific to your application.
@@ -65,6 +65,7 @@
   :play-pattern
   (fn [db [_ row column]]
     (println "playing" row column)
+    (if-let [repl (:repl db)] (-> repl :process (repl-send "d1 $ s \"bd\""))) ; FIXME: find section definition
     (assoc db :playback {:section row
                          :patterns (-> db :track :channels count (take (repeat row)))})))
 
