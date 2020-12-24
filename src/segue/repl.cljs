@@ -33,7 +33,8 @@
     ;  (.on (.-stdout proc) "data"  #(put! channel %))
     ;  (.on (.-stderr proc) "data"  #(put! channel %))
     ;  (.on proc "close" #(put! channel [:done %])))
-      [:text {:bold true :content @content}])))
+      (fn [_]
+        [:text {:bold true :content @content}]))))
 
 
 
