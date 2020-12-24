@@ -151,6 +151,7 @@
   (let [extension (-> filename (string/split ".") last)
         syntax    (-> extension keyword syntax-map)]
     ;(rf/dispatch-sync [:set-track] {})
+    ;(rf/dispatch-sync [:repl-kill] {})
     (state-assoc :syntax extension)
     (update-track :syntax syntax)
     (state-assoc :file filename)

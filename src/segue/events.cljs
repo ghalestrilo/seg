@@ -4,7 +4,8 @@
   https://github.com/Day8/re-frame/blob/master/docs/EffectfulHandlers.md"
   (:require
     [re-frame.core :as rf]
-    [segue.track :refer [read-file load-track]]))
+    [segue.track :refer [read-file load-track]]
+    [segue.repl :refer [spawn-process]]))
 ; Below are very general effect handlers. While you can use these to get
 ; going quickly you are likely better off creating custom handlers for actions
 ; specific to your application.
@@ -66,3 +67,17 @@
     (println "playing" row column)
     (assoc db :playback {:section row
                          :patterns (-> db :track :channels count (take (repeat row)))})))
+
+; FIXME: This does not kill the process yet
+(rf/reg-event-db
+  :repl-kill
+  (fn [db [_]]
+    (if (:repl db)
+        (do (println "killing current process")))))
+
+(rf/reg-event-db
+  :repl-start
+  (fn [db [_]]
+    (let [command "echo \"hello state!\""] ;FIXME: Should read from plugin
+      (assoc-in db [:repl :process] 
+        (spawn-process commandd)))))

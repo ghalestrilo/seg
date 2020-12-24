@@ -6,10 +6,18 @@
   (:require [cljs.core.async :refer [<! take! chan close! put! go-loop >!] :as async])
   (:require ["child_process" :refer [spawn]]))
 
+(defn spawn-process
+  "Takes a command, starts a node process with that command inside user-configured terminal
+   and returns the process"
+  [command]
+  (let [term "zsh"] ; FIXME: Should be user preference
+    (spawn term (clj->js ["-c" command]))))
+
 (defn done-message? [message]
   (and
     (vector? message)
     (= (message 0) :done)))
+
 
 
 ; proc.kill("SIGINT")
@@ -25,7 +33,9 @@
         content (r/atom "hello")
         channel (chan)
         messages (r/atom [])
-        command "ghci -ghci-script /home/ghales/git/libtidal/boot.tidal"]
+        command "echo \"hello sailor!\""]
+        ;command "ghci -ghci-script /home/ghales/git/libtidal/boot.tidal"]
+    (.on js/process "exit" #())
     (comment
       ; NOTE: go-loop should be at same logical level as the (let) below
       (go-loop []
@@ -38,8 +48,9 @@
               ;(println (.toString v "UTF8"))
               ;(reset! content (.toString v "UTF8"))
               (recur))))))
-    (let [proc (spawn "zsh" (clj->js ["-c" command]))]
-      (.on (.-stdout proc) "data" #(reset! content (str %)))
+    (let [proc (-> (rf/subscribe [:repl]) :process)
+          dummy-proc (spawn-process command)]
+      (.on (.-stdout dummy-proc) "data" #(reset! content (str %)))
       
       ; (.on (.-stdout proc) "data"  #(put! channel %)) ; FIXME: Once the async loop is fixed, use this
 
@@ -49,6 +60,7 @@
         [:text {:bold true :content @content}]))))
 
 
+"ghci -ghci-script /home/ghales/git/libtidal/boot.tidal"
 
 ; In the future, we want 2 running behaviors:
 ; standalone: default behavior, spawns and manages processes
