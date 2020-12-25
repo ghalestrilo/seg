@@ -17,7 +17,7 @@
 
 (def plugins
   {:tidal
-    {:regexes
+    { :regexes
       { :block   #"( *).*(\n|(\1) +.*)*"
         :channel #"(?<=\sp *\")([^\".]*)|(?<=d)[1-8]"
         :pattern #"\$( |)\w+ .*"
@@ -27,7 +27,10 @@
         :section #"do\n( +)?(.*\n( +).*)*"
         :section-name #"(?<=-- @name( ))\w+"}
       ;:boot "ghci -ghci-script /home/ghales/git/libtidal/boot.tidal"}})
-      :boot "ghci -ghci-script /home/ghales/git/libtidal/boot.tidal"}})
+      :boot "ghci -ghci-script /home/ghales/git/libtidal/boot.tidal"
+      :prep-command
+        { :pre  ":{"
+          :post ":}"}}})
       
 
 ; 1. Set syntax to state
@@ -110,7 +113,7 @@
 (defn parse-section
   [section-text]
   (-> {}
-    ;(assoc :definition section-text)
+    (assoc :definition section-text)
     ; (assoc :patterns (get-matches))
     (assoc :name (get-section-name section-text))))
 
@@ -147,6 +150,16 @@
 (defn update-track
   [key value]
   (rf/dispatch-sync [:update-track {key value}]))
+
+
+; FIXME: not sure this works at all
+(defn prep-command
+  [command]
+  (let [track @(rf/subscribe [:track])]
+    ;(if-let [{:keys [pre post]} (-> track :syntax plugins :prep-command)]
+    (let [pre ":{" post ":}"]
+      (clojure.string/join " " pre command post))))
+      
 
 (defn load-track
   [filename]

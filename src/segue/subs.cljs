@@ -46,7 +46,6 @@
   (fn [db _]
     (-> db :playback)))
 
-  
 (rf/reg-sub
   :repl
   (fn [db _]

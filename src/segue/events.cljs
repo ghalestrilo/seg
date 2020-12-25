@@ -65,7 +65,10 @@
   :play-pattern
   (fn [db [_ row column]]
     (println "playing" row column)
-    (if-let [repl (:repl db)] (-> repl :process (repl-send "d1 $ s \"bd\""))) ; FIXME: find section definition
+    (if-let [repl         (:repl db)]
+      (if-let [section-code (-> db :track :sections (nth row) :definition)]
+        (-> repl :process (repl-send section-code)) ; FIXME: find section definition
+        (println section-code)))
     (assoc db :playback {:section row
                          :patterns (-> db :track :channels count (take (repeat row)))})))
 
