@@ -40,9 +40,6 @@
       [:text
         { :bold true
           :content (->> repl-data :messages (clojure.string/join " "))}]]))
-        
-
-
 
 ; In the future, we want 2 running behaviors:
 ; standalone: default behavior, spawns and manages processes

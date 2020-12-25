@@ -17,14 +17,15 @@
 
 (def plugins
   {:tidal
-    { :regexes {  :block   #"( *).*(\n|(\1) +.*)*"
-                  :channel #"(?<=\sp *\")([^\".]*)|(?<=d)[1-8]"
-                  :pattern #"\$( |)\w+ .*"
-                  :channel-command #"( +)p( |)\"(.|\n\1( +))*"
-                  ;:section #"do(\n|^).*?(?=\n|$)"
-                  ;:section #"do\n(\s)(.*\n\1)*.*"
-                  :section #"do\n( +)?(.*\n( +).*)*"
-                  :section-name #"(?<=-- @name( ))\w+"}
+    {:regexes
+      { :block   #"( *).*(\n|(\1) +.*)*"
+        :channel #"(?<=\sp *\")([^\".]*)|(?<=d)[1-8]"
+        :pattern #"\$( |)\w+ .*"
+        :channel-command #"( +)p( |)\"(.|\n\1( +))*"
+        ;:section #"do(\n|^).*?(?=\n|$)"
+        ;:section #"do\n(\s)(.*\n\1)*.*"
+        :section #"do\n( +)?(.*\n( +).*)*"
+        :section-name #"(?<=-- @name( ))\w+"}
       :boot "ghci -ghci-script /home/ghales/git/libtidal/boot.tidal"}})
       
 
@@ -80,7 +81,7 @@
 
 (defn get-syntax-field
   [fieldname strings]
-  (let [syntax (-> plugins :tidal regexes)]
+  (let [syntax (-> plugins :tidal :regexes)]
     (get-matches (get fieldname syntax) strings)))
 
 (defn fassoc
@@ -115,7 +116,7 @@
 ;; FIXME: This code is hideous
 (defn parse-content
   [content & {:keys [syntax]}]
-  (let [regexes (:tidal plugins)
+  (let [regexes (-> plugins :tidal :regexes)
         assoc-track-field #(assoc %1 %2 (get-track-field content regexes %2))]
     (-> {}
       (assoc-track-field :channel)
