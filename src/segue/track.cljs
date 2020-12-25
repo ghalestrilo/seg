@@ -15,16 +15,16 @@
    :py    :foxdot})
    
 
-(def syntaxes
+(def plugins
   {:tidal
-    { :block   #"( *).*(\n|(\1) +.*)*"
-      :channel #"(?<=\sp *\")([^\".]*)|(?<=d)[1-8]"
-      :pattern #"\$( |)\w+ .*"
-      :channel-command #"( +)p( |)\"(.|\n\1( +))*"
-      ;:section #"do(\n|^).*?(?=\n|$)"
-      ;:section #"do\n(\s)(.*\n\1)*.*"
-      :section #"do\n( +)?(.*\n( +).*)*"
-      :section-name #"(?<=-- @name( ))\w+"
+    { :regexes {  :block   #"( *).*(\n|(\1) +.*)*"
+                  :channel #"(?<=\sp *\")([^\".]*)|(?<=d)[1-8]"
+                  :pattern #"\$( |)\w+ .*"
+                  :channel-command #"( +)p( |)\"(.|\n\1( +))*"
+                  ;:section #"do(\n|^).*?(?=\n|$)"
+                  ;:section #"do\n(\s)(.*\n\1)*.*"
+                  :section #"do\n( +)?(.*\n( +).*)*"
+                  :section-name #"(?<=-- @name( ))\w+"}
       :boot "ghci -ghci-script /home/ghales/git/libtidal/boot.tidal"}})
       
 
@@ -65,8 +65,7 @@
 (defn get-track-field
   [content syntax-def fieldname & all]
   (let [db @(rf/subscribe [:db])
-        syntax-name (:syntax db)
-        syntax-def2 (get syntaxes syntax-name)]
+        syntax-name (:syntax db)]
     (println syntax-name)
     (-> syntax-def fieldname (re-seq content))))
   
@@ -81,7 +80,7 @@
 
 (defn get-syntax-field
   [fieldname strings]
-  (let [syntax (:tidal syntaxes)]
+  (let [syntax (-> plugins :tidal regexes)]
     (get-matches (get fieldname syntax) strings)))
 
 (defn fassoc
@@ -116,7 +115,7 @@
 ;; FIXME: This code is hideous
 (defn parse-content
   [content & {:keys [syntax]}]
-  (let [regexes (:tidal syntaxes)
+  (let [regexes (:tidal plugins)
         assoc-track-field #(assoc %1 %2 (get-track-field content regexes %2))]
     (-> {}
       (assoc-track-field :channel)
