@@ -11,11 +11,12 @@
    and returns the process"
   [command]
   (let [term "zsh" ; FIXME: Should be user preference
-        proc (spawn term (clj->js ["-c" command]))]
+        proc (spawn term (clj->js ["-c" command]))
+        send-msg #(rf/dispatch-sync [:repl-update-message (str %)] (str %))]
     (.on js/process "exit" #(.kill proc "SIGINT")) 
-    (.on (.-stdout proc) "data" #(rf/dispatch-sync [:repl-update-message (str %)] (str %)))
+    (.on (.-stdout proc) "data" send-msg)
+    (.on (.-stderr proc) "data" send-msg)
     ;(.on (.-stdout proc) "data"  #(put! channel %)) ; FIXME: Once the async loop is fixed, use this
-    ;(.on (.-stderr proc) "data"  #(put! channel %))
     ;(.on proc "close" #(put! channel [:done %])))
     proc))
 
