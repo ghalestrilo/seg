@@ -140,6 +140,7 @@
       (dissoc :block)
       (fassoc :sections #(->> % :section-definitions (into []) (map parse-section)))
       (dissoc :section-definitions)
+      (assoc :setup "d1 $ s \"bd\"")
       identity)))
 
 
@@ -157,9 +158,18 @@
   [command]
   (let [track @(rf/subscribe [:track])]
     ;(if-let [{:keys [pre post]} (-> track :syntax plugins :prep-command)]
-    (let [pre ":{" post ":}"]
-      (clojure.string/join " " pre command post))))
-      
+    (let [pre ":{\n" post "\n:}"]
+      (println "command: " command)
+      (clojure.string/join " " [pre (str command) post]))))
+    ;command))
+
+; TODO: This is currently getting the definition directly
+; It should instead build the definition from the block data
+(defn prep-section
+  [section]
+  (println "section:" (:definition section))
+  (->> section :definition str prep-command)) ; FIXME: This returns nil
+  ;section)
 
 (defn load-track
   [filename]
@@ -172,6 +182,8 @@
     (state-assoc :file filename)
     (state-assoc :track (-> filename read-file (parse-content syntax)))
     ; TODO: Start process here with plugin boot command
-    ;(rf/dispatch-sync [:repl-start "echo doing && sleep 2 && echo done"])
-    (rf/dispatch-sync [:repl-start (-> syntax plugins :boot)])))
+    (rf/dispatch-sync [:repl-start (-> syntax plugins :boot)])
+    (let [setup (-> (rf/subscribe [:track]) deref :setup)]
+      (rf/dispatch-sync [:eval setup] setup))))
+      
 
