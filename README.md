@@ -3,7 +3,7 @@
 A LiveCoding Session Manager.
 
 ## ⚠️ Work in Progress ⚠️
-(nothing works right now)
+(very early development)
 
 ![asdasd](img/2020-12-12-seg.png) 
 
@@ -26,6 +26,22 @@ The tool is under development following the [cljs-tui-template](https://github.c
 TL;DR it uses [reagent](https://reagent-project.github.io/)/[reframe](https://github.com/Day8/re-frame) ([react](https://reactjs.org/)/[redux](https://redux.js.org/) for cljs) to create interfaces using [react-blessed](https://github.com/Yomguithereal/react-blessed) components, which interface with the [blessed](https://github.com/chjj/blessed) terminal interface engine.
 
 ATM. I'm organizing the project roadmap via issues. Feel free to grab one and tackle it.
+
+## Running 
+
+Update `track.cljs`, changing the filename at the end of the `:boot` parameter of the `:tidal` extension to point to yout boot file.
+Run `npm install`
+
+Open two terminals on root folder
+
+Terminal 1: run `npm run init`.
+Terminal 2: wait until build finishes and run `node --inspect target/js/compiled/segue.js <filename>`, where filename is the absolute path to a tidalcycles file, including extension.
+
+Remember to organize your track in annotated blocks:
+
+- A `do` block with a `-- @name <name>` comment will be parsed as a named section
+- The first `let` statement in the file is presumed to declare all track-level variables, and will be evaluated as the track loads
+- A `do` block with a `-- @setup` comment will be run as the track loads
 
 ## Usage
 
