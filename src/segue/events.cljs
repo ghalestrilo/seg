@@ -88,7 +88,6 @@
 (rf/reg-event-db
   :repl-update-message
   (fn [db [_ message]]
-    (for [i (range 1000)] (println message))
     (update-in db [:repl :messages]
       (comp
         ;#(take-last 5 %)
