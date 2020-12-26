@@ -135,7 +135,13 @@
 
 (defn get-setup
   [{:keys [block]}]
-  ())
+  ;"d1 $ s \"bd\""
+  (let [regexes (:regexes (get-plugin))]
+    (->> block
+        (get-matches (:setup regexes))
+        (map (partial string/join ""))
+        flatten
+        first)))
 
 (defn get-variables
   [{:keys [block]}]
@@ -172,8 +178,8 @@
       ;(dissoc :block)
       (fassoc :sections #(->> % :section-definitions (into []) (map parse-section)))
       (dissoc :section-definitions)
-      (assoc  :setup "d1 $ s \"bd\"")
       (fassoc :variables get-variables)
+      (fassoc :setup     get-setup)
       (dissoc :block)
       identity)))
 
