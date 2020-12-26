@@ -139,11 +139,13 @@
 
 (defn get-variables
   [{:keys [block]}]
-  (->> block
-    (get-matches (:section regexes))
-    (map (partial string/join ""))
-    flatten))
-  ;"d2 $ s \"sn*2\" # orbit 0")
+  (let [regexes (:regexes (get-plugin))]
+    (->> block
+      (get-matches (:variable-block regexes))
+      (map (partial string/join ""))
+      flatten
+      first)))
+    ;"d2 $ s \"sn*2\" # orbit 0")
 
 ;; FIXME: This code is hideous
 (defn parse-content
@@ -171,7 +173,7 @@
       (fassoc :sections #(->> % :section-definitions (into []) (map parse-section)))
       (dissoc :section-definitions)
       (assoc  :setup "d1 $ s \"bd\"")
-      ;(fassoc :variables get-variables)
+      (fassoc :variables get-variables)
       (dissoc :block)
       identity)))
 
@@ -211,6 +213,7 @@
     (println "[info] track has no setup block: " track))
   (if-let [variables (:variables track)]
     (rf/dispatch-sync [:eval variables] variables)
+    ;(println (first variables))
     (println "[info] track has no variables block: " track)))
 
 
