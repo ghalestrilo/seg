@@ -4,7 +4,8 @@
   https://github.com/Day8/re-frame/blob/master/docs/EffectfulHandlers.md"
   (:require
     [re-frame.core :as rf]
-    [segue.track :refer [read-file load-track]]))
+    [segue.track :refer [read-file prep-section load-track]]
+    [segue.repl :refer [spawn-process repl-send]]))
 ; Below are very general effect handlers. While you can use these to get
 ; going quickly you are likely better off creating custom handlers for actions
 ; specific to your application.
@@ -59,3 +60,51 @@
   :set-track
   (fn [db [_ data]]
     (assoc db :track data)))
+
+(rf/reg-event-db
+  :play-pattern
+  (fn [db [_ row column]]
+    ; Case 1: Playing a section
+    (println "playing" row column)
+    (if-let [repl         (:repl db)]
+      (if-let [section      (-> db :track :sections (nth row {}))]
+        ;(println "section:" (prep-section section))
+        (-> repl :process (repl-send (prep-section section))))) ; FIXME: find section definition
+        ;(when-let [section-code (:definition section)]
+        ;    (-> repl :process (repl-send section-code)) ; FIXME: find section definition
+        ;    (println "section code:" section-code))))
+    (assoc db :playback {:section row
+                         :patterns (-> db :track :channels count (take (repeat row)))})))
+
+; FIXME: This does not kill the process yet
+(rf/reg-event-db
+  :repl-kill
+  (fn [db [_]]
+    (if-let [{:keys [repl]} db]
+        (do (println "killing current process")
+            (-> repl :process (.kill "SIGINT"))
+            (dissoc db :repl)))))
+
+(rf/reg-event-db
+  :repl-update-message
+  (fn [db [_ message]]
+    (update-in db [:repl :messages]
+      (comp
+        ;#(take-last 5 %)
+        #(-> % (or []) (concat [message]))))))
+
+(rf/reg-event-db
+  :repl-start
+  (fn [db [_ command]]
+    (let [proc (spawn-process command)] ;FIXME: Should read from plugin
+      (assoc-in db [:repl :process] proc)))) 
+
+(rf/reg-event-db
+  :eval
+  (fn [db [_ command]]
+    (if-let [{:keys [repl]} db]
+      (-> repl :process (repl-send command)))    
+    ;(println command)
+    db))
+  
+  

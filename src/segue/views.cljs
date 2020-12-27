@@ -178,53 +178,71 @@
   ; c/enter: choose section
   ; m + idx(s): mute idxes
 
+
+
+; FIXME: "active" does not update. why? (always false/nil)
+(defn text-cell
+  "Wrapper for text, which can be styled through high-level props
+  content:      str | The text that will be rendered
+  active:      bool | Whether or not to bold the text
+  highlighted: bool | Whether or not to highlight the text
+  "
+  [{:keys [content active highlighted left right top]}]
+  (let [highlight (if highlighted { :bg "magenta" :fg "black" } { :bg "transparent" :fg "white"})]
+    [:box (merge {:style highlight} { :height 1 :left left :top top})
+      [:text (->> highlight
+                  (merge {:bold active})
+                  (array-map :style)
+                  (merge {:content content}))]]))
+
+(defn section-row
+  "Displays a track section as a named row of patterns
+  Receives two maps:
+  1. Display data:
+    top          int | Offset from top of parent
+    cell-width   int | Width of each column in characters
+    active      bool | Wether or not to display name in bold
+    highlighted bool | Wether or not to highlight entire row
+  2. Section data:
+    key          str | unique key (html) for the section
+    name         str | Name of section, as defined in the track
+    patterns     str | List of patterns which the section will match to the channels
+  "
+  [{:keys [active top cell-width highlighted]} {:keys [key name patterns]}]
+  [:box { :top top
+            :key key
+            :width "100%"}
+      [text-cell {:key (str "section" idx "-title") 
+                  :content name
+                  :highlighted highlighted
+                  :active active}]
+      ; Section Patterns (Horizontal list)
+      (for [[pat-idx pattern] (map-indexed vector patterns)]
+        [text-cell
+          {:key (str "sec" section-idx "-pat" pat-idx) 
+            :highlighted highlighted
+            :left (-> pat-idx inc (* 10))
+            :content pattern}])])
+
 (defn session-section-mode
   "...docstring"
-  [{:keys [channel-data section-data selected toggle-mode select-next select-prev]}]
+  [{:keys [channel-data section-data playback selected on-select
+           toggle-mode select-next select-prev play-pattern]}]
   ; Render
-  (fn [{:keys [channel-data section-data selected toggle-mode select-next select-prev]}]
-    (let [selected-row selected
-          width 10
-          cell-style #(if (= % selected-row) {:bg "magenta" :fg "black"} {:bg "transparent" :fg "white"})]
+  (let [selected-row selected
+        width 10]
       (with-keys @screen {["k" "up"]    select-prev
                           ["j" "down"]  select-next
                           ["l" "right"] toggle-mode
-                          ["e" "enter"] #(if on-select (on-select selected-row
-                                                        (println "[session-section-mode] No on-select callback!")))}
+                          ["e" "enter"] #(if on-select (on-select) (println "[session-section-mode] No on-select callback!"))}
         [:box
-          ; Header: Channels
-          (for [[channel-idx channel] (map-indexed vector channel-data)]
-            ;TODO: Create type-1 component [grid-header /] for this
-            [:text {:left (-> channel-idx  (+ 1) (* width))
-                    :key  (str "chan" channel-idx)
-                    :style (cell-style section-idx)
-                    :content channel}])
-          ; Sections (vertical list)
-          (for [[section-idx section] (map-indexed vector section-data)]
-            ;TODO: Create type-1 component [section-row /] for this
-            [:box { :top (+ 1 section-idx)
-                    :height 1
-                    :style (cell-style section-idx)
-                    :key (str "section" idx)}
-              [:text {:key (str "section" idx "-title") 
-                      :style (cell-style section-idx)
-                      :content (:name section)}]
-               
-              
-              ; Section Patterns (Horizontal list)
-              (for [[pat-idx pattern] (map-indexed vector (:patterns section))]
-                ;TODO: Create type-1 component [pattern-cell /] for this
-                [:text {:left (-> pat-idx  (+ 1) (* width))
-                        :key (str "sec" section-idx "-pat" pat-idx) 
-                        :style (cell-style section-idx)
-                        :content pattern}])])]))))
-                
-              
-          
-
-(comment
-  [:listtable { :data section-data
-                    :keys "vi"
-                    :interactive true
-                    :style {:selected {:bold true :bg "magenta"}
-                            :header   {:bold true}}}])
+          [section-row {:key "header"}
+                       {:patterns @channel-data}]
+          (println active-session)
+          (doall
+            (for [[section-idx section] (map-indexed vector @section-data)]
+              [section-row {:highlighted (= section-idx selected-row)
+                            :key (str "section" number)
+                            :top (inc section-idx)
+                            :active (-> @playback :section (= section-idx))}
+                        section]))])))
