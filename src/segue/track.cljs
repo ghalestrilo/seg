@@ -143,6 +143,21 @@
         flatten
         first)))
 
+(defn get-section-definitions
+  [{:keys [block]}]
+  (let [regexes (:regexes (get-plugin))]
+    (->> block
+        (get-matches (:section regexes))
+        (map (partial string/join ""))
+        flatten)))
+
+(defn get-sections
+  [{:keys [section-definitions]}]
+  (let [regexes (:regexes (get-plugin))]
+    (->> section-definitions
+         (into [])
+         (map parse-section))))
+
 (defn get-variables
   [{:keys [block]}]
   (let [regexes (:regexes (get-plugin))]
@@ -167,16 +182,12 @@
       (dissoc :channel)
 
       ; FIXME: This is a workaround for an incorrect regex
-      (fassoc :section-definitions
-              #(->> %
-                    :block
-                    (get-matches (:section regexes))
-                    (map (partial string/join ""))
-                    flatten))
+      (fassoc :section-definitions get-section-definitions)
 
       ;(#(assoc % :sections (:section-definitions %)))
       ;(dissoc :block)
       (fassoc :sections #(->> % :section-definitions (into []) (map parse-section)))
+      ;(fassoc :sections-new  get-sections)
       (dissoc :section-definitions)
       (fassoc :variables get-variables)
       (fassoc :setup     get-setup)
@@ -236,5 +247,4 @@
     ; TODO: Start process here with plugin boot command
     (rf/dispatch-sync [:repl-start (-> syntax plugins :boot)])
     (run-track-setup @(rf/subscribe [:track]))))
-      
 
