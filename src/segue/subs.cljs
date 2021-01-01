@@ -50,7 +50,16 @@
   (fn [db _]
     (-> db :repl (or {:process nil :messages []}))))
 
+; NOTE: The two subs below and their calls must be updated to account for multi-select
+
 (rf/reg-sub
   :selection
   (fn [db _]
     (:session/selection db)))
+
+(rf/reg-sub
+  :selection-content
+  (fn [db _]
+    (let [selection (-> db :session/selection)
+          sections  (-> db :track :sections)]
+      (nth sections selection))))

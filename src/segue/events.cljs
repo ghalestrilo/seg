@@ -114,7 +114,7 @@
     (if-let [{:keys [track]} db]
       (->> selection
         (max 0)
-        (min (-> track :sections count))
+        (min (-> track :sections count (- 1)))
         (assoc db :session/selection)))))
 
 

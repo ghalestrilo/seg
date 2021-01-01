@@ -43,7 +43,7 @@
 
 (defn selection-display
   []
-  (let [selection true])
-  [:box {}
-    [:text "haha"]])
+  (let [selection @(rf/subscribe [:selection-content])]
+    [:box {}
+      [:text selection]]))
 
