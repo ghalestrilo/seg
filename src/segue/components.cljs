@@ -41,9 +41,14 @@
           :height "100%"}
     (r/children (r/current-component))])
 
+; NOTE: This will probably need to change when working with multi-statement selection
+(defn format-display
+  [section]
+  (-> section :definition str))
+
 (defn selection-display
   []
   (let [selection @(rf/subscribe [:selection-content])]
     [:box {}
-      [:text (-> selection :definition str)]]))
+      [:text (format-display selection)]]))
 
