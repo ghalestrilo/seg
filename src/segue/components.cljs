@@ -37,7 +37,7 @@
           :border {:type :line}
           :label (or label " Sidebar ")
           :right 0
-          :width "25%"
+          :width "35%"
           :height "100%"}
     (r/children (r/current-component))])
 
@@ -45,5 +45,5 @@
   []
   (let [selection @(rf/subscribe [:selection-content])]
     [:box {}
-      [:text selection]]))
+      [:text (-> selection :definition str)]]))
 
