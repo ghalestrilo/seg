@@ -38,15 +38,17 @@
   [_]
   (r/with-let
        [width 10
-        row         (r/atom 0)
+        row         (rf/subscribe [:selection])
         grid-mode   (r/atom true)
         channels       (rf/subscribe [:channels])
         sections       (rf/subscribe [:sections])
         playback-data  (rf/subscribe [:playback])
         play-pattern   #(rf/dispatch  [:play-pattern @row %2])
         toggle-mode #(swap! grid-mode not)
-        select-next #(swap! row (if (-> (rf/subscribe [:sections]) deref count (+ 1) (< @row)) identity inc)) ; FIXME: I have no clue if this is the best way to limit 
-        select-prev #(swap! row (if (= @row 0) identity dec))
+        ;select-next #(swap! row (if (-> (rf/subscribe [:sections]) deref count (+ 1) (< @row)) identity inc)) ; FIXME: I have no clue if this is the best way to limit 
+        ;select-prev #(swap! row (if (= @row 0) identity dec))
+        select-next    #(rf/dispatch [:update-selection (+ @row 1)])
+        select-prev    #(rf/dispatch [:update-selection (- @row 1)])
         old-channels [ {:name "p1" :def "# s \"supervibe\" # gain 0.8" :patterns [ "0 0 0*2 0"]}
                        {:name "p2" :def "# s \"gretsch\" # gain 0.8"   :patterns [ "0(3,8)" "0 0" "0*4" "degrade 8 $ \"0 0\""]}]]
     (fn [_]

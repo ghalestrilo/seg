@@ -25,7 +25,6 @@
           view @(rf/subscribe [:view])]
       (if view (view help-content) help-content)))) ; FIXME: Replace :home with view here
 
-
 (rf/reg-sub
   :track
   (fn [db _]
@@ -50,3 +49,8 @@
   :repl
   (fn [db _]
     (-> db :repl (or {:process nil :messages []}))))
+
+(rf/reg-sub
+  :selection
+  (fn [db _]
+    (:session/selection db)))
