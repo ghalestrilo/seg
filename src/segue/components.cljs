@@ -16,16 +16,12 @@
   [{:keys [items]}]
   (let [help-content @(rf/subscribe [:help])
         expanded false] ;TODO: move this state to :interface
-    [:box { :top 0
-            :style {:border {:fg :magenta}}
-            :border {:type :line}
-            :label " Help "
-            :height "100%"
-            :width "100%"}
+    [:box { :bottom 0
+            :style {:border {:fg :magenta}}}
       ; for [[idx [value label]] (map-indexed vector options)]
       ; (println help-content)
       (for [[idx [keyname action]] (map-indexed vector help-content)]
-        [:text {:key idx :top idx :left 1} (str keyname " - " action)])]))
+        [:text {:key idx :bottom idx :left 1} (str keyname " - " action)])]))
 
 
 (defn sidebar
@@ -43,7 +39,7 @@
           :right 0
           :width "25%"
           :height "100%"}
-    children])
+    (r/children (r/current-component))])
 
 (defn selection-display
   []

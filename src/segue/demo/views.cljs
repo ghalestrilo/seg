@@ -102,6 +102,6 @@
             :border {:type :line}}
       [repl]]
     [sidebar {}
-      selection-display]
-    help
+      selection-display
+      help]
     child])
