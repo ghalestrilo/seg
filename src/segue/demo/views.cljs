@@ -37,16 +37,14 @@
 (defn session
   [_]
   (r/with-let
-       [width 10
-        row         (rf/subscribe [:selection])
-        grid-mode   (r/atom true)
+       [{:keys [column-width]} @(rf/subscribe [:settings])
+        grid-mode      (r/atom true)
+        row            (rf/subscribe [:selection])
         channels       (rf/subscribe [:channels])
         sections       (rf/subscribe [:sections])
         playback-data  (rf/subscribe [:playback])
+        toggle-mode    #(swap! grid-mode not)
         play-pattern   #(rf/dispatch  [:play-pattern @row %2])
-        toggle-mode #(swap! grid-mode not)
-        ;select-next #(swap! row (if (-> (rf/subscribe [:sections]) deref count (+ 1) (< @row)) identity inc)) ; FIXME: I have no clue if this is the best way to limit 
-        ;select-prev #(swap! row (if (= @row 0) identity dec))
         select-next    #(rf/dispatch [:update-selection (+ @row 1)])
         select-prev    #(rf/dispatch [:update-selection (- @row 1)])
         old-channels [ {:name "p1" :def "# s \"supervibe\" # gain 0.8" :patterns [ "0 0 0*2 0"]}
@@ -69,7 +67,8 @@
                   :section-data  sections
                   :channel-data  channels
                   :playback playback-data
-                  :selected    @row}]
+                  :selected    @row
+                  :column-width column-width}]
             [player-grid
               {:options old-channels
                :toggle-mode toggle-mode

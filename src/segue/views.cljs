@@ -221,16 +221,16 @@
         [text-cell
           {:key (str "sec" section-idx "-pat" pat-idx) 
             :highlighted highlighted
-            :left (-> pat-idx inc (* 10))
+            :left (-> pat-idx inc (* (or cell-width 10)))
             :content pattern}])])
 
 (defn session-section-mode
   "...docstring"
   [{:keys [channel-data section-data playback selected on-select
-           toggle-mode select-next select-prev play-pattern]}]
+           toggle-mode select-next select-prev play-pattern column-width]}]
   ; Render
   (let [selected-row selected
-        width 10]
+        width        column-width]
       (with-keys @screen {["k" "up"]    select-prev
                           ["j" "down"]  select-next
                           ["l" "right"] toggle-mode
@@ -238,11 +238,12 @@
         [:box
           [section-row {:key "header"}
                        {:patterns @channel-data}]
-          (println active-session)
+          ;(println active-session)
           (doall
             (for [[section-idx section] (map-indexed vector @section-data)]
               [section-row {:highlighted (= section-idx selected-row)
                             :key (str "section" number)
                             :top (inc section-idx)
+                            :cell-width width
                             :active (-> @playback :section (= section-idx))}
                         section]))])))

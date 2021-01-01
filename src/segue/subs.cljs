@@ -50,6 +50,11 @@
   (fn [db _]
     (-> db :repl (or {:process nil :messages []}))))
 
+(rf/reg-sub
+  :settings
+  (fn [db _]
+    (:settings db)))
+
 ; NOTE: The two subs below and their calls must be updated to account for multi-select
 
 (rf/reg-sub

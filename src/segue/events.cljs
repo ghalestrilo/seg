@@ -36,6 +36,7 @@
   :init
   (fn [db [_ opts terminal-size]]
     {:opts opts
+     :settings { :column-width 4}
      :router/view :home
      :terminal/size terminal-size
      :dialog/help help-messages
