@@ -5,7 +5,7 @@
    [re-frame.core :as rf]
    [reagent.core :as r]
    [segue.views :refer [router vertical-menu player-grid session-section-mode]]
-   [segue.components :refer [help]]
+   [segue.components :refer [help sidebar selection-display]]
    [segue.repl :refer [repl]]))
 
 (defn navbar
@@ -101,7 +101,7 @@
             :style {:border { :fg :magenta}}
             :border {:type :line}}
       [repl]]
-    [help {:key "1" :items
-                       ["up/down - choose pattern"
-                        "left/right - choose player"]}]
+    [sidebar {}
+      selection-display]
+    help
     child])
