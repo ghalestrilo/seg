@@ -48,7 +48,9 @@
 
 (defn selection-display
   []
-  (let [selection @(rf/subscribe [:selection-content])]
+  (let [selection @(rf/subscribe [:selection-content])
+        track     @(rf/subscribe [:track])]
     [:box {}
-      [:text (format-display selection)]]))
+      [:text (format-display selection)]
+      [:text (->> track :sections (map :patterns))]])) ;FIXME: Remove this
 

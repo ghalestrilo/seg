@@ -33,7 +33,9 @@
         ;:section #"do\n(\s)(.*\n\1)*.*"
         :section          #"do\n( +)?(.*\n( +).*)*"
         :section-name     #"(?<=-- @name( ))\w+" ; TODO: substitute lookback
+        ;:section-statement #"( +)(.*)((\n\1 )(.*))+"
         :section-statement #"( +)(.*)((\n\1 )(.*))*"
+        ;:section-statement #"( )+"
         :setup            #"do(.|\n)*-- @setup(.|\n[( )+\t])+"} ; t2: will be run on statements
       ;:boot "ghci -ghci-script /home/ghales/git/libtidal/boot.tidal"}})
       :boot "ghci -ghci-script /home/ghales/git/libtidal/boot.tidal"
@@ -144,7 +146,7 @@
 ; 1. Build channel-pattern map (iterate section, convert strings to keywords)
 ; 2. Map current channels to keywords, use keywords to retrieve map values
 ; Algorithm
-; Map statements to channel names
+; Map statements to channel names (use map-indexed)
 ; Map track channels to indices
 ; Use indices to read statements from array
 (defn get-pattern-list
@@ -153,22 +155,35 @@
         channels      (:channels @(rf/subscribe [:track]))
         statements    (:statements section)
         channel-regex (:channel regexes)]
-    (let [channel-refs (get-matches channel-regex statements)]
-      (println channel-refs)
-      (->> channels
-          (map identity) ; FIXME: redundant
-          (map count)
-          (map #(get statements %))
-          (map str)))))
-    
+    ;(println (map str statements))
+    (for [statement statements] (println statement))
+    (let [indexed-statements (map-indexed vector statements)]
+      (->> indexed-statements
+        (filter #(-> % second some?))
+        println
+        ;(map #(into {} (keyword (second %)) (first %)))
+        (map (fn [[name idx]] {(keyword name) idx}))))))
+        ; map channels
+        
+          
+            
+      
+
+(defn get-section-statements
+  [section]
+  (let [regexes (get-regexes)]
+    (->>  (:definition section)
+          (re-seq (:section-statement regexes))
+          (map first)
+          flatten
+          (into []))))
 
 (defn parse-section
   [section-text]
   (let [regexes (get-regexes)]
     (-> {}
       (assoc  :definition section-text)
-      (fassoc :statements #(get-matches (:section-statement regexes)
-                                        (:definition %)))
+      (fassoc :statements get-section-statements)  
       (fassoc :patterns get-pattern-list)
       ;(dissoc :definition)
       ;(dissoc :statements)
