@@ -159,29 +159,28 @@
 ; Map track channels to indices
 ; Use indices to read statements from array
 
-(defn statement-to-channel-keypair
-  [text idx]
-  (-> (hash-map text)))
-
 (defn get-pattern-list
   [section]
   (let [regexes       (get-regexes)
-        channels      (:channels @(rf/subscribe [:track]))
+        channels      (->> @(rf/subscribe [:track]) :channels (map keyword))
         statements    (:statements section)
         channel-regex (:channel regexes)]
     ;(println (map str statements))
 
+
     ; Extract channel maps from statemment block
     (->> statements
-      ;(filter #(-> % second some?))
-      
       ;(map #(into [] (re-find channel-regex %) %))
       (map str)
+      ;#(let [x %] (println x) x)
       (map #(seq (re-find channel-regex %) %))
-      ;(map (fn [[name idx]] (hash-map (keyword name) idx)))
+      (filter #(-> % second some?))
+      (map (fn [[name idx]] (hash-map (keyword name) idx)))
+      (into {})
       println)
       ; map channels
-    (repeat 3 "test")))
+    ;(repeat 3 "test")))
+    channels))
 
 (defn parse-section
   [section-text]
