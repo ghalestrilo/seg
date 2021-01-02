@@ -33,7 +33,7 @@
         ;:section #"do\n(\s)(.*\n\1)*.*"
         :section          #"do\n( +)?(.*\n( +).*)*"
         :section-name     #"(?<=-- @name( ))\w+" ; TODO: substitute lookback
-        :section-statment #"( +)(.*)((\n\1 )(.*))*"
+        :section-statement #"( +)(.*)((\n\1 )(.*))*"
         :setup            #"do(.|\n)*-- @setup(.|\n[( )+\t])+"} ; t2: will be run on statements
       ;:boot "ghci -ghci-script /home/ghales/git/libtidal/boot.tidal"}})
       :boot "ghci -ghci-script /home/ghales/git/libtidal/boot.tidal"
@@ -87,13 +87,24 @@
     (-> syntax-def fieldname (re-seq content))))
   
 (defn get-matches
-  ""
+  "receives a regex re and a list of strings [s]
+    returns a list of all matches of re to the first string in the list"
   [regex strings]
   (->> strings
     (map first)
     (map #(re-find regex %))
     (filter some?)
     (into [])))
+
+
+(defn exclude-matches
+  "receives a regex re and a list of strings [s]
+    returns a list of all strings that do not match that regex"
+  [regex strings]
+  (if regex
+    (filter #(->> % (re-find regex) nil?) strings)
+    strings))
+
 
 (defn get-syntax-field
   [fieldname strings]
@@ -130,7 +141,7 @@
   (let [regexes (:regexes (get-plugin))]
     (-> {}
       (assoc :definition section-text)
-      (fassoc :statements #(get-matches (:section-statment regexes) regexes))
+      (fassoc :statements #(get-matches (:section-statement regexes) (:definition &)))
       (assoc :name (get-section-name section-text)))))
 
 ; TODO: Move code @151 here
@@ -162,6 +173,7 @@
   [{:keys [section-definitions]}]
   (let [regexes (:regexes (get-plugin))]
     (->> section-definitions
+         ;(exclude-matches (:setup regexes))
          (into [])
          (map parse-section))))
 
@@ -218,6 +230,7 @@
   [command]
   (let [track @(rf/subscribe [:track])]
     ;(if-let [{:keys [pre post]} (-> track :syntax plugins :prep-command)]
+    ; FIXME: use pre and post as defined in syntax
     (let [pre ":{\n" post "\n:}"]
       (println "command: " command)
       (clojure.string/join " " [pre (str command) post]))))
