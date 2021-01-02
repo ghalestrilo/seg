@@ -51,6 +51,5 @@
   (let [selection @(rf/subscribe [:selection-content])
         track     @(rf/subscribe [:track])]
     [:box {}
-      [:text (format-display selection)]
-      [:text (->> track :sections (map :patterns))]])) ;FIXME: Remove this
+      [:text (format-display selection)]]))
 

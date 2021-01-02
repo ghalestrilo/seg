@@ -98,7 +98,7 @@
              :views {:home session}
              :view view}]
     [:box { :bottom 0
-            :height "80%"
+            :height "60%"
             :style {:border { :fg :magenta}}
             :border {:type :line}}
       [repl]]

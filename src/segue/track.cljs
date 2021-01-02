@@ -164,23 +164,24 @@
   (let [regexes       (get-regexes)
         channels      (->> @(rf/subscribe [:track]) :channels (map keyword))
         statements    (:statements section)
-        channel-regex (:channel regexes)]
+        channel-regex (:channel regexes)
     ;(println (map str statements))
 
 
     ; Extract channel maps from statemment block
-    (->> statements
-      ;(map #(into [] (re-find channel-regex %) %))
-      (map str)
-      ;#(let [x %] (println x) x)
-      (map #(seq (re-find channel-regex %) %))
-      (filter #(-> % second some?))
-      (map (fn [[name idx]] (hash-map (keyword name) idx)))
-      (into {})
-      println)
+        statement-map
+          (->> statements
+            ;(map #(into [] (re-find channel-regex %) %))
+            (map str)
+            ;#(let [x %] (println x) x)
+            (map #(seq (re-find channel-regex %) %))
+            (filter #(-> % second some?))
+            (map (fn [[name idx]] (hash-map (keyword name) idx)))
+            (into {}))]
+            
       ; map channels
     ;(repeat 3 "test")))
-    channels))
+    (map #(get statement-map %) channels)))
 
 (defn parse-section
   [section-text]
