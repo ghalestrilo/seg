@@ -45,6 +45,10 @@
   []
   (:tidal plugins))
 
+(defn get-regexes
+  []
+  (:regexes (get-plugin)))
+
 ; 1. Set syntax to state
 ; 2. Functions subscribe to state in order to get syntax
 
@@ -138,7 +142,7 @@
 ; 2. Map current channels to keywords, use keywords to retrieve map values
 (defn parse-section
   [section-text]
-  (let [regexes (:regexes (get-plugin))]
+  (let [regexes (get-regexes)]
     (-> {}
       (assoc :definition section-text)
       (fassoc :statements #(get-matches (:section-statement regexes) (:definition &)))
@@ -152,7 +156,7 @@
 (defn get-setup
   [{:keys [block]}]
   ;"d1 $ s \"bd\""
-  (let [regexes (:regexes (get-plugin))]
+  (let [regexes (get-regexes)]
     (->> block
         (get-matches (:setup regexes))
         (map (partial string/join ""))
@@ -162,7 +166,7 @@
 
 (defn get-section-definitions
   [{:keys [block]}]
-  (let [regexes (:regexes (get-plugin))]
+  (let [regexes (get-regexes)]
     (->> block
         (get-matches (:section regexes))
         (map (partial string/join ""))
@@ -171,9 +175,9 @@
 
 (defn get-sections
   [{:keys [section-definitions]}]
-  (let [regexes (:regexes (get-plugin))]
+  (let [regexes (get-regexes)]
     (->> section-definitions
-         ;(exclude-matches (:setup regexes))
+         (exclude-matches (:setup regexes))
          (into [])
          (map parse-section))))
 
@@ -181,7 +185,7 @@
 
 (defn get-variables
   [{:keys [block]}]
-  (let [regexes (:regexes (get-plugin))]
+  (let [regexes (get-regexes)]
     (->> block
       (get-matches (:variable-block regexes))
       (map (partial string/join ""))
