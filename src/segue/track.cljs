@@ -139,23 +139,29 @@
       (or "?")))
 
 
-
-(defn get-pattern-list
-  [section]
-  (let [regexes (get-regexes)
-        channel-regex (:channel regexes)]
-    []))
-
-
 ; TODO: Parse patterns and map them to players
 ; IDEA: section-parsing algorithm:
 ; 1. Build channel-pattern map (iterate section, convert strings to keywords)
 ; 2. Map current channels to keywords, use keywords to retrieve map values
 ; Algorithm
-; Get statements
 ; Map statements to channel names
 ; Map track channels to indices
 ; Use indices to read statements from array
+(defn get-pattern-list
+  [section]
+  (let [regexes       (get-regexes)
+        channels      (:channels @(rf/subscribe [:track]))
+        statements    (:statements section)
+        channel-regex (:channel regexes)]
+    (let [channel-refs (get-matches channel-regex statements)]
+      (println channel-refs)
+      (->> channels
+          (map identity) ; FIXME: redundant
+          (map count)
+          (map #(get statements %))
+          (map str)))))
+    
+
 (defn parse-section
   [section-text]
   (let [regexes (get-regexes)]
@@ -164,6 +170,8 @@
       (fassoc :statements #(get-matches (:section-statement regexes)
                                         (:definition %)))
       (fassoc :patterns get-pattern-list)
+      ;(dissoc :definition)
+      ;(dissoc :statements)
       (assoc  :name (get-section-name section-text)))))
 
 ; TODO: Move code @151 here
