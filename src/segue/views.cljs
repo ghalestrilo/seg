@@ -236,7 +236,7 @@
                           ["l" "right"] toggle-mode
                           ["e" "enter"] #(if on-select (on-select) (println "[session-section-mode] No on-select callback!"))}
         [:box
-          [section-row {:key "header"}
+          [section-row {:key "header" :cell-width width}
                        {:patterns @channel-data}]
           ;(println active-session)
           (doall
