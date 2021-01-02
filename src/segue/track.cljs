@@ -150,37 +150,22 @@
           flatten
           (into []))))
 
-; TODO: Parse patterns and map them to players
-; IDEA: section-parsing algorithm:
-; 1. Build channel-pattern map (iterate section, convert strings to keywords)
-; 2. Map current channels to keywords, use keywords to retrieve map values
-; Algorithm
-; Map statements to channel names (use map-indexed)
-; Map track channels to indices
-; Use indices to read statements from array
-
 (defn get-pattern-list
   [section]
   (let [regexes       (get-regexes)
         channels      (->> @(rf/subscribe [:track]) :channels (map keyword))
         statements    (:statements section)
         channel-regex (:channel regexes)
-    ;(println (map str statements))
-
 
     ; Extract channel maps from statemment block
-        statement-map
-          (->> statements
-            ;(map #(into [] (re-find channel-regex %) %))
-            (map str)
-            ;#(let [x %] (println x) x)
-            (map #(seq (re-find channel-regex %) %))
-            (filter #(-> % second some?))
-            (map (fn [[name idx]] (hash-map (keyword name) idx)))
-            (into {}))]
-            
-      ; map channels
-    ;(repeat 3 "test")))
+        statement-map (->> statements
+                        (map str)
+                        (map #(seq (re-find channel-regex %) %))
+                        (filter #(-> % second some?))
+                        (map (fn [[name idx]] (hash-map (keyword name) idx)))
+                        (into {}))]
+
+    ; Find out what each channel does in that section (Access statement map)
     (map #(get statement-map %) channels)))
 
 (defn parse-section
