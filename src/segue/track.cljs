@@ -20,20 +20,21 @@
 (def plugins
   {:tidal
     { :regexes
-      { :statement #"^(.+)(\n*( ).*)*"   ; t1 (top-level) regex. Will be run before all
-        :variable-block #"^let (.|\n)+"  ; t2: Will be run on statements
-        :block   #"( *).*(\n|(\1) +.*)*" ; FIXME: Deprecate in favor of statement
+      { :statement        #"^(.+)(\n*( ).*)*"   ; t1 (top-level) regex. Will be run before all
+        :variable-block   #"^let (.|\n)+"  ; t2: Will be run on statements
+        :block            #"( *).*(\n|(\1) +.*)*" ; FIXME: Deprecate in favor of statement
         
-        :channel #"(?<=\sp *\")([^\".]*)|(?<=d)[1-8]" ; t2: will be run on statements
+        :channel          #"(?<=\sp *\")([^\".]*)|(?<=d)[1-8]" ; t2: will be run on statements
           ; TODO: substitute lookback
 
-        :pattern #"\$( |)\w+ .*"
-        :channel-command #"( +)p( |)\"(.|\n\1( +))*"
+        :pattern          #"\$( |)\w+ .*"
+        :channel-command  #"( +)p( |)\"(.|\n\1( +))*"
         ;:section #"do(\n|^).*?(?=\n|$)"
         ;:section #"do\n(\s)(.*\n\1)*.*"
-        :section #"do\n( +)?(.*\n( +).*)*"
-        :section-name #"(?<=-- @name( ))\w+" ; TODO: substitute lookback
-        :setup        #"do(.|\n)*-- @setup(.|\n[( )+\t])+"} ; t2: will be run on statements
+        :section          #"do\n( +)?(.*\n( +).*)*"
+        :section-name     #"(?<=-- @name( ))\w+" ; TODO: substitute lookback
+        :section-statment #"( +)(.*)((\n\1 )(.*))*"
+        :setup            #"do(.|\n)*-- @setup(.|\n[( )+\t])+"} ; t2: will be run on statements
       ;:boot "ghci -ghci-script /home/ghales/git/libtidal/boot.tidal"}})
       :boot "ghci -ghci-script /home/ghales/git/libtidal/boot.tidal"
       :prep-command
@@ -110,9 +111,7 @@
 ; IDEA: Create (set-track-field) events
 ;  set :syntax before calling anything
 
-; IDEA: section-parsing algorithm:
-; 1. Build channel-pattern map (iterate section, convert strings to keywords)
-; 2. Map current channels to keywords, use keywords to retrieve map values
+
 
 (defn get-section-name
   [text]
@@ -121,12 +120,17 @@
       first
       (or "?")))
 
+
+; TODO: Parse patterns and map them to players
+; IDEA: section-parsing algorithm:
+; 1. Build channel-pattern map (iterate section, convert strings to keywords)
+; 2. Map current channels to keywords, use keywords to retrieve map values
 (defn parse-section
   [section-text]
   (let [regexes (:regexes (get-plugin))]
     (-> {}
       (assoc :definition section-text)
-      (assoc :patterns (get-matches))
+      (fassoc :statements #(get-matches (:section-statment regexes) regexes))
       (assoc :name (get-section-name section-text)))))
 
 ; TODO: Move code @151 here
@@ -144,6 +148,7 @@
         flatten
         first)))
 
+
 (defn get-section-definitions
   [{:keys [block]}]
   (let [regexes (:regexes (get-plugin))]
@@ -152,13 +157,15 @@
         (map (partial string/join ""))
         flatten)))
 
-; TODO: Parse patterns and map them to players
+
 (defn get-sections
   [{:keys [section-definitions]}]
   (let [regexes (:regexes (get-plugin))]
     (->> section-definitions
          (into [])
          (map parse-section))))
+
+
 
 (defn get-variables
   [{:keys [block]}]
