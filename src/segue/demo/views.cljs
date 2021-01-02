@@ -102,7 +102,7 @@
             :style {:border { :fg :magenta}}
             :border {:type :line}}
       [repl]]
-    [sidebar {}
+    [sidebar { :label " Section Preview "}
       selection-display
       help]
     child])

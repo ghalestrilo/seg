@@ -12,10 +12,11 @@
   Returns hiccup vector."
   [_]
   (let [view @(rf/subscribe [:view])
-        rows (:rows @(rf/subscribe [:size]))]
+        rows (:rows @(rf/subscribe [:size]))
+        show-debug (:debug-mode @(rf/subscribe [:opts]))]
     [home
      {:view view}
-     [debug/debug-box rows]]))
+     (if show-debug [debug/debug-box rows])]))
 
 ;(defn ui
 ;  "Basic wrapper to show the demo app and the debug view half height.

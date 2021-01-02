@@ -26,6 +26,11 @@
       (if view (view help-content) help-content)))) ; FIXME: Replace :home with view here
 
 (rf/reg-sub
+  :opts
+  (fn [db _]
+    (:opts db)))
+
+(rf/reg-sub
   :track
   (fn [db _]
     (:track db)))

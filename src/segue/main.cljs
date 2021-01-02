@@ -50,7 +50,8 @@
     :id :verbosity
     :default 0
     :update-fn inc]
-   ["-h" "--help"]])
+   ["-h" "--help"]
+   ["-d" "--debug" :id :debug-mode]])
 
 (defn args->opts
   "Takes a list of arguments.

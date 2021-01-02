@@ -123,10 +123,11 @@
 
 (defn parse-section
   [section-text]
-  (-> {}
-    (assoc :definition section-text)
-    ; (assoc :patterns (get-matches))
-    (assoc :name (get-section-name section-text))))
+  (let [regexes (:regexes (get-plugin))]
+    (-> {}
+      (assoc :definition section-text)
+      (assoc :patterns (get-matches))
+      (assoc :name (get-section-name section-text)))))
 
 ; TODO: Move code @151 here
 (defn get-sections
@@ -151,6 +152,7 @@
         (map (partial string/join ""))
         flatten)))
 
+; TODO: Parse patterns and map them to players
 (defn get-sections
   [{:keys [section-definitions]}]
   (let [regexes (:regexes (get-plugin))]
