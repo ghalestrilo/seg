@@ -92,7 +92,10 @@
   
 (defn get-matches
   "receives a regex re and a list of strings [s]
-    returns a list of all matches of re to the first string in the list"
+    returns a list of all full matches of re each string in the list
+    note: re-find returns a list when there are parenthesized regexes
+      where the first element is the full match (hence map first)
+      and the rest are partial matches"
   [regex strings]
   (->> strings
     (map first)
@@ -106,7 +109,7 @@
     returns a list of all strings that do not match that regex"
   [regex strings]
   (if regex
-    (filter #(->> % (re-find regex) nil?) strings)
+    (filter (comp nil? (partial re-find regex)) strings) 
     strings))
 
 
@@ -136,17 +139,32 @@
       (or "?")))
 
 
+
+(defn get-pattern-list
+  [section]
+  (let [regexes (get-regexes)
+        channel-regex (:channel regexes)]
+    []))
+
+
 ; TODO: Parse patterns and map them to players
 ; IDEA: section-parsing algorithm:
 ; 1. Build channel-pattern map (iterate section, convert strings to keywords)
 ; 2. Map current channels to keywords, use keywords to retrieve map values
+; Algorithm
+; Get statements
+; Map statements to channel names
+; Map track channels to indices
+; Use indices to read statements from array
 (defn parse-section
   [section-text]
   (let [regexes (get-regexes)]
     (-> {}
-      (assoc :definition section-text)
-      (fassoc :statements #(get-matches (:section-statement regexes) (:definition &)))
-      (assoc :name (get-section-name section-text)))))
+      (assoc  :definition section-text)
+      (fassoc :statements #(get-matches (:section-statement regexes)
+                                        (:definition %)))
+      (fassoc :patterns get-pattern-list)
+      (assoc  :name (get-section-name section-text)))))
 
 ; TODO: Move code @151 here
 (defn get-sections
