@@ -141,6 +141,15 @@
       (or "?")))
 
 
+(defn get-section-statements
+  [section]
+  (let [regexes (get-regexes)]
+    (->>  (:definition section)
+          (re-seq (:section-statement regexes))
+          (map first) ; pick largest match
+          flatten
+          (into []))))
+
 ; TODO: Parse patterns and map them to players
 ; IDEA: section-parsing algorithm:
 ; 1. Build channel-pattern map (iterate section, convert strings to keywords)
@@ -149,6 +158,11 @@
 ; Map statements to channel names (use map-indexed)
 ; Map track channels to indices
 ; Use indices to read statements from array
+
+(defn statement-to-channel-keypair
+  [text idx]
+  (-> (hash-map text)))
+
 (defn get-pattern-list
   [section]
   (let [regexes       (get-regexes)
@@ -156,27 +170,18 @@
         statements    (:statements section)
         channel-regex (:channel regexes)]
     ;(println (map str statements))
-    (for [statement statements] (println statement))
-    (let [indexed-statements (map-indexed vector statements)]
-      (->> indexed-statements
-        (filter #(-> % second some?))
-        println
-        ;(map #(into {} (keyword (second %)) (first %)))
-        (map (fn [[name idx]] {(keyword name) idx}))))))
-        ; map channels
-        
-          
-            
-      
 
-(defn get-section-statements
-  [section]
-  (let [regexes (get-regexes)]
-    (->>  (:definition section)
-          (re-seq (:section-statement regexes))
-          (map first)
-          flatten
-          (into []))))
+    ; Extract channel maps from statemment block
+    (->> statements
+      ;(filter #(-> % second some?))
+      
+      ;(map #(into [] (re-find channel-regex %) %))
+      (map str)
+      (map #(seq (re-find channel-regex %) %))
+      ;(map (fn [[name idx]] (hash-map (keyword name) idx)))
+      println)
+      ; map channels
+    (repeat 3 "test")))
 
 (defn parse-section
   [section-text]
