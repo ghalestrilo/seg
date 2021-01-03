@@ -38,8 +38,11 @@
   [_]
   (let [repl-data @(rf/subscribe [:repl])]
     [:box
-      [:text
-        { :content (->> repl-data :messages)}]]))
+      {:scrollable true
+       :alwaysScroll true
+       :valign "bottom"}
+      [:text 
+        { :valign "bottom" :bottom 1 :content (->> repl-data :messages)}]]))
 
 ; In the future, we want 2 running behaviors:
 ; standalone: default behavior, spawns and manages processes

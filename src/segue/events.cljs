@@ -93,7 +93,7 @@
     (update-in db [:repl :messages]
       #(->> message
         (str %)
-        (take-last 500) ; improve this logic to account for 
+        ;(take-last 500) ; improve this logic to account for 
         (clojure.string/join "")
         (str)))))
       
