@@ -42,7 +42,10 @@
        :alwaysScroll true
        :valign "bottom"}
       [:text 
-        { :valign "bottom" :bottom 1 :content (->> repl-data :messages)}]]))
+        { :valign "bottom"
+          :bottom 1
+          :clickable true
+          :content (->> repl-data :messages)}]]))
 
 ; In the future, we want 2 running behaviors:
 ; standalone: default behavior, spawns and manages processes
