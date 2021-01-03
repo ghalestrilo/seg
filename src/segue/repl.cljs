@@ -10,10 +10,12 @@
   "Takes a command, starts a node process with that command inside user-configured terminal
    and returns the process"
   [command]
-  (let [term "zsh" ; FIXME: Should be user preference
+  (let [term "bash" ; FIXME: Should be user preference
         proc (spawn term (clj->js ["-c" command]))
-        send-msg #(rf/dispatch-sync [:repl-update-message (str %)])]
-    (.on js/process "exit" #(.kill proc "SIGINT")) 
+        send-msg #(rf/dispatch-sync [:repl-update-message (str %)])
+        kill-repl #(.kill proc "SIGINT")]
+    (for [event ["exit" "error" "close"]]
+      (.on js/process event kill-repl)) 
     (.on (.-stdout proc) "data" send-msg)
     (.on (.-stderr proc) "data" send-msg)
     ;(.on (.-stdout proc) "data"  #(put! channel %)) ; FIXME: Once the async loop is fixed, use this
