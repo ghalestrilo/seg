@@ -5,7 +5,7 @@
    [re-frame.core :as rf]
    [reagent.core :as r]
    [segue.views :refer [router vertical-menu player-grid session-section-mode]]
-   [segue.components :refer [help]]
+   [segue.components :refer [help sidebar selection-display]]
    [segue.repl :refer [repl]]))
 
 (defn navbar
@@ -37,16 +37,16 @@
 (defn session
   [_]
   (r/with-let
-       [width 10
-        row         (r/atom 0)
-        grid-mode   (r/atom true)
+       [{:keys [column-width]} @(rf/subscribe [:settings])
+        grid-mode      (r/atom true)
+        row            (rf/subscribe [:selection])
         channels       (rf/subscribe [:channels])
         sections       (rf/subscribe [:sections])
         playback-data  (rf/subscribe [:playback])
+        toggle-mode    #(swap! grid-mode not)
         play-pattern   #(rf/dispatch  [:play-pattern @row %2])
-        toggle-mode #(swap! grid-mode not)
-        select-next #(swap! row (if (-> (rf/subscribe [:sections]) deref count (+ 1) (< @row)) identity inc)) ; FIXME: I have no clue if this is the best way to limit 
-        select-prev #(swap! row (if (= @row 0) identity dec))
+        select-next    #(rf/dispatch [:update-selection (+ @row 1)])
+        select-prev    #(rf/dispatch [:update-selection (- @row 1)])
         old-channels [ {:name "p1" :def "# s \"supervibe\" # gain 0.8" :patterns [ "0 0 0*2 0"]}
                        {:name "p2" :def "# s \"gretsch\" # gain 0.8"   :patterns [ "0(3,8)" "0 0" "0*4" "degrade 8 $ \"0 0\""]}]]
     (fn [_]
@@ -67,7 +67,8 @@
                   :section-data  sections
                   :channel-data  channels
                   :playback playback-data
-                  :selected    @row}]
+                  :selected    @row
+                  :column-width column-width}]
             [player-grid
               {:options old-channels
                :toggle-mode toggle-mode
@@ -97,11 +98,11 @@
              :views {:home session}
              :view view}]
     [:box { :bottom 0
-            :height "80%"
+            :height "60%"
             :style {:border { :fg :magenta}}
             :border {:type :line}}
       [repl]]
-    [help {:key "1" :items
-                       ["up/down - choose pattern"
-                        "left/right - choose player"]}]
+    [sidebar { :label " Section Preview "}
+      selection-display
+      help]
     child])

@@ -25,6 +25,10 @@
           view @(rf/subscribe [:view])]
       (if view (view help-content) help-content)))) ; FIXME: Replace :home with view here
 
+(rf/reg-sub
+  :opts
+  (fn [db _]
+    (:opts db)))
 
 (rf/reg-sub
   :track
@@ -50,3 +54,22 @@
   :repl
   (fn [db _]
     (-> db :repl (or {:process nil :messages []}))))
+
+(rf/reg-sub
+  :settings
+  (fn [db _]
+    (:settings db)))
+
+; NOTE: The two subs below and their calls must be updated to account for multi-select
+
+(rf/reg-sub
+  :selection
+  (fn [db _]
+    (:session/selection db)))
+
+(rf/reg-sub
+  :selection-content
+  (fn [db _]
+    (let [selection (-> db :session/selection)
+          sections  (-> db :track :sections)]
+      (nth sections selection))))

@@ -36,9 +36,11 @@
   :init
   (fn [db [_ opts terminal-size]]
     {:opts opts
+     :settings { :column-width 12}
      :router/view :home
      :terminal/size terminal-size
      :dialog/help help-messages
+     :session/selection 0
      :track demo-track}))
 
 (rf/reg-event-db
@@ -106,5 +108,15 @@
       (-> repl :process (repl-send command)))    
     ;(println command)
     db))
-  
+
+(rf/reg-event-db
+  :update-selection
+  (fn [db [_ selection]]
+    (if-let [{:keys [track]} db]
+      (->> selection
+        (max 0)
+        (min (-> track :sections count (- 1)))
+        (assoc db :session/selection)))))
+
+
   

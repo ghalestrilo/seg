@@ -20,20 +20,23 @@
 (def plugins
   {:tidal
     { :regexes
-      { :statement #"^(.+)(\n*( ).*)*"   ; t1 (top-level) regex. Will be run before all
-        :variable-block #"^let (.|\n)+"  ; t2: Will be run on statements
-        :block   #"( *).*(\n|(\1) +.*)*" ; FIXME: Deprecate in favor of statement
+      { :statement        #"^(.+)(\n*( ).*)*"   ; t1 (top-level) regex. Will be run before all
+        :variable-block   #"^let (.|\n)+"  ; t2: Will be run on statements
+        :block            #"( *).*(\n|(\1) +.*)*" ; FIXME: Deprecate in favor of statement
         
-        :channel #"(?<=\sp *\")([^\".]*)|(?<=d)[1-8]" ; t2: will be run on statements
+        :channel          #"(?<=\sp *\")([^\".]*)|(?<=d)[1-8]" ; t2: will be run on statements
           ; TODO: substitute lookback
 
-        :pattern #"\$( |)\w+ .*"
-        :channel-command #"( +)p( |)\"(.|\n\1( +))*"
+        :pattern          #"\$( |)\w+ .*"
+        :channel-command  #"( +)p( |)\"(.|\n\1( +))*"
         ;:section #"do(\n|^).*?(?=\n|$)"
         ;:section #"do\n(\s)(.*\n\1)*.*"
-        :section #"do\n( +)?(.*\n( +).*)*"
-        :section-name #"(?<=-- @name( ))\w+" ; TODO: substitute lookback
-        :setup        #"do(.|\n)*-- @setup(.|\n[( )+\t])+"} ; t2: will be run on statements
+        :section          #"do\n( +)?(.*\n( +).*)*"
+        :section-name     #"(?<=-- @name( ))\w+" ; TODO: substitute lookback
+        ;:section-statement #"( +)(.*)((\n\1 )(.*))+"
+        :section-statement #"( +)(.*)((\n\1 )(.*))*"
+        ;:section-statement #"( )+"
+        :setup            #"do(.|\n)*-- @setup(.|\n[( )+\t])+"} ; t2: will be run on statements
       ;:boot "ghci -ghci-script /home/ghales/git/libtidal/boot.tidal"}})
       :boot "ghci -ghci-script /home/ghales/git/libtidal/boot.tidal"
       :prep-command
@@ -43,6 +46,10 @@
 (defn get-plugin
   []
   (:tidal plugins))
+
+(defn get-regexes
+  []
+  (:regexes (get-plugin)))
 
 ; 1. Set syntax to state
 ; 2. Functions subscribe to state in order to get syntax
@@ -86,13 +93,27 @@
     (-> syntax-def fieldname (re-seq content))))
   
 (defn get-matches
-  ""
+  "receives a regex re and a list of strings [s]
+    returns a list of all full matches of re each string in the list
+    note: re-find returns a list when there are parenthesized regexes
+      where the first element is the full match (hence map first)
+      and the rest are partial matches"
   [regex strings]
   (->> strings
     (map first)
     (map #(re-find regex %))
     (filter some?)
     (into [])))
+
+
+(defn exclude-matches
+  "receives a regex re and a list of strings [s]
+    returns a list of all strings that do not match that regex"
+  [regex strings]
+  (if regex
+    (filter (comp nil? (partial re-find regex)) strings) 
+    strings))
+
 
 (defn get-syntax-field
   [fieldname strings]
@@ -110,9 +131,7 @@
 ; IDEA: Create (set-track-field) events
 ;  set :syntax before calling anything
 
-; IDEA: section-parsing algorithm:
-; 1. Build channel-pattern map (iterate section, convert strings to keywords)
-; 2. Map current channels to keywords, use keywords to retrieve map values
+
 
 (defn get-section-name
   [text]
@@ -121,12 +140,44 @@
       first
       (or "?")))
 
+
+(defn get-section-statements
+  [section]
+  (let [regexes (get-regexes)]
+    (->>  (:definition section)
+          (re-seq (:section-statement regexes))
+          (map first) ; pick largest match
+          flatten
+          (into []))))
+
+(defn get-pattern-list
+  [section]
+  (let [regexes       (get-regexes)
+        channels      (->> @(rf/subscribe [:track]) :channels (map keyword))
+        statements    (:statements section)
+        channel-regex (:channel regexes)
+
+    ; Extract channel maps from statemment block
+        statement-map (->> statements
+                        (map str)
+                        (map #(seq (re-find channel-regex %) %))
+                        (filter #(-> % second some?))
+                        (map (fn [[name idx]] (hash-map (keyword name) idx)))
+                        (into {}))]
+
+    ; Find out what each channel does in that section (Access statement map)
+    (map #(get statement-map %) channels)))
+
 (defn parse-section
   [section-text]
-  (-> {}
-    (assoc :definition section-text)
-    ; (assoc :patterns (get-matches))
-    (assoc :name (get-section-name section-text))))
+  (let [regexes (get-regexes)]
+    (-> {}
+      (assoc  :definition section-text)
+      (fassoc :statements get-section-statements)  
+      (fassoc :patterns get-pattern-list)
+      ;(dissoc :definition)
+      ;(dissoc :statements)
+      (assoc  :name (get-section-name section-text)))))
 
 ; TODO: Move code @151 here
 (defn get-sections
@@ -136,16 +187,36 @@
 (defn get-setup
   [{:keys [block]}]
   ;"d1 $ s \"bd\""
-  (let [regexes (:regexes (get-plugin))]
+  (let [regexes (get-regexes)]
     (->> block
         (get-matches (:setup regexes))
         (map (partial string/join ""))
         flatten
         first)))
 
+
+(defn get-section-definitions
+  [{:keys [block]}]
+  (let [regexes (get-regexes)]
+    (->> block
+        (get-matches (:section regexes))
+        (map (partial string/join ""))
+        flatten)))
+
+
+(defn get-sections
+  [{:keys [section-definitions]}]
+  (let [regexes (get-regexes)]
+    (->> section-definitions
+         (exclude-matches (:setup regexes))
+         (into [])
+         (map parse-section))))
+
+
+
 (defn get-variables
   [{:keys [block]}]
-  (let [regexes (:regexes (get-plugin))]
+  (let [regexes (get-regexes)]
     (->> block
       (get-matches (:variable-block regexes))
       (map (partial string/join ""))
@@ -167,16 +238,12 @@
       (dissoc :channel)
 
       ; FIXME: This is a workaround for an incorrect regex
-      (fassoc :section-definitions
-              #(->> %
-                    :block
-                    (get-matches (:section regexes))
-                    (map (partial string/join ""))
-                    flatten))
+      (fassoc :section-definitions get-section-definitions)
 
       ;(#(assoc % :sections (:section-definitions %)))
       ;(dissoc :block)
       (fassoc :sections #(->> % :section-definitions (into []) (map parse-section)))
+      ;(fassoc :sections-new  get-sections)
       (dissoc :section-definitions)
       (fassoc :variables get-variables)
       (fassoc :setup     get-setup)
@@ -198,6 +265,7 @@
   [command]
   (let [track @(rf/subscribe [:track])]
     ;(if-let [{:keys [pre post]} (-> track :syntax plugins :prep-command)]
+    ; FIXME: use pre and post as defined in syntax
     (let [pre ":{\n" post "\n:}"]
       (println "command: " command)
       (clojure.string/join " " [pre (str command) post]))))
@@ -236,5 +304,4 @@
     ; TODO: Start process here with plugin boot command
     (rf/dispatch-sync [:repl-start (-> syntax plugins :boot)])
     (run-track-setup @(rf/subscribe [:track]))))
-      
 
