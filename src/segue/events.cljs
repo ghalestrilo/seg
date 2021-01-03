@@ -91,9 +91,12 @@
   :repl-update-message
   (fn [db [_ message]]
     (update-in db [:repl :messages]
-      (comp
-        ;#(take-last 5 %)
-        #(-> % (or []) (concat [message]))))))
+      #(->> message
+        (str %)
+        (take-last 5000) ; improve this logic to account for 
+        (clojure.string/join "")
+        (str)))))
+      
 
 (rf/reg-event-db
   :repl-start

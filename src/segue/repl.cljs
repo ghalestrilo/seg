@@ -10,17 +10,16 @@
   "Takes a command, starts a node process with that command inside user-configured terminal
    and returns the process"
   [command]
-  (let [term "bash" ; FIXME: Should be user preference
-        proc (spawn term (clj->js ["-c" command]))
-        send-msg #(rf/dispatch-sync [:repl-update-message (str %)])
-        kill-repl #(.kill proc "SIGINT")]
-    (for [event ["exit" "error" "close"]]
-      (.on js/process event kill-repl)) 
-    (.on (.-stdout proc) "data" send-msg)
-    (.on (.-stderr proc) "data" send-msg)
-    ;(.on (.-stdout proc) "data"  #(put! channel %)) ; FIXME: Once the async loop is fixed, use this
-    ;(.on proc "close" #(put! channel [:done %])))
-    proc))
+  (let [term "bash"] ; FIXME: Should be user preference
+    (let [proc (spawn term (clj->js ["-c" command]))
+          send-msg #(rf/dispatch-sync [:repl-update-message (str %)])
+          kill-repl #(.kill proc "SIGINT")]
+      (for [event ["exit" "error" "close"]]
+        (.on js/process event kill-repl)) 
+      (.on (.-stdout proc) "data" send-msg)
+      (.on (.-stderr proc) "data" send-msg)
+      proc)))
+      
 
 
 ; TODO: Does not work yet!
@@ -39,8 +38,14 @@
   [_]
   (let [repl-data @(rf/subscribe [:repl])]
     [:box
-      [:text
-        { :content (->> repl-data :messages (clojure.string/join " "))}]]))
+      {:scrollable true
+       :alwaysScroll true
+       :valign "bottom"}
+      [:text 
+        { :valign "bottom"
+          :bottom 1
+          :clickable true
+          :content (->> repl-data :messages)}]]))
 
 ; In the future, we want 2 running behaviors:
 ; standalone: default behavior, spawns and manages processes
