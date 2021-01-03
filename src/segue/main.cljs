@@ -51,7 +51,8 @@
     :default 0
     :update-fn inc]
    ["-h" "--help"]
-   ["-d" "--debug" :id :debug-mode]])
+   ["-d" "--debug" :id :debug-mode]
+   ["--no-repl" :id :repl-disabled]])
 
 (defn args->opts
   "Takes a list of arguments.
