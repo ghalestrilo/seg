@@ -96,7 +96,6 @@
         (take-last 5000) ; improve this logic to account for 
         (clojure.string/join "")
         (str)))))
-      
 
 (rf/reg-event-db
   :repl-start

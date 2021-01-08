@@ -28,13 +28,7 @@
                    :fg :black
                    :on-select #(rf/dispatch [:update {:router/view %}])}]])
 
-
-; (def grid-mode (r/atom true)) ; FIXME: why does this not work inside let?
-
-; (def s< (comp deref re-frame.core/subscribe))
-; (def s> re-frame.core/dispatch)
-
-(defn session
+(defn session-view
   [_]
   (r/with-let
        [{:keys [column-width]} @(rf/subscribe [:settings])
@@ -50,29 +44,38 @@
         old-channels [ {:name "p1" :def "# s \"supervibe\" # gain 0.8" :patterns [ "0 0 0*2 0"]}
                        {:name "p2" :def "# s \"gretsch\" # gain 0.8"   :patterns [ "0(3,8)" "0 0" "0*4" "degrade 8 $ \"0 0\""]}]]
     (fn [_]
-      [:box { :top 0
-              :style {:border { :fg :magenta}}
-              :border {:type :line}
-              :label (if @grid-mode " Choose Section " " Choose Pattern ")
-              :right 0
-              :width "100%"
-              :height "100%"}
-        (if @grid-mode
-              [session-section-mode
-                { :toggle-mode toggle-mode
-                  :select-next select-next
-                  :select-prev select-prev
-                  ; :on-select  #(for [[idx channel] (map-indexed vector channels)] (do (println "playing" idx) (play-pattern % idx)))
-                  :on-select  #(doall (for [[idx channel] (map-indexed vector @channels)] (play-pattern % idx)))
-                  :section-data  sections
-                  :channel-data  channels
-                  :playback playback-data
-                  :selected    @row
-                  :column-width column-width}]
-            [player-grid
-              {:options old-channels
-               :toggle-mode toggle-mode
-               :play-pattern play-pattern}])]))) 
+      [:box
+        [:box { :top 0
+                :style {:border { :fg :magenta}}
+                :border {:type :line}
+                :label (if @grid-mode " Choose Section " " Choose Pattern ")
+                :right 0
+                :width "100%"
+                :height "100%"}
+          (if @grid-mode
+                [session-section-mode
+                  { :toggle-mode toggle-mode
+                    :select-next select-next
+                    :select-prev select-prev
+                    ; :on-select  #(for [[idx channel] (map-indexed vector channels)] (do (println "playing" idx) (play-pattern % idx)))
+                    :on-select  #(doall (for [[idx channel] (map-indexed vector @channels)] (play-pattern % idx)))
+                    :section-data  sections
+                    :channel-data  channels
+                    :playback playback-data
+                    :selected    @row
+                    :column-width column-width}]
+              [player-grid
+                {:options old-channels}
+                :toggle-mode toggle-mode
+                :play-pattern play-pattern])]        
+        [:box { :bottom 0
+                :height "60%"
+                :style {:border { :fg :magenta}}
+                :border {:type :line}}
+          [repl]]
+        [sidebar { :label " Section Preview "}
+          selection-display
+          help]])))
 
 
 
@@ -95,14 +98,35 @@
               :height "100%"}
     ;(when (not= view :loader) [navbar])
     [router {:key "2"
-             :views {:home session}
+             :views {:home session-view}
              :view view}]
-    [:box { :bottom 0
-            :height "60%"
-            :style {:border { :fg :magenta}}
-            :border {:type :line}}
-      [repl]]
-    [sidebar { :label " Section Preview "}
-      selection-display
-      help]
     child])
+
+(comment
+  (defn editor-view
+    "Main wrapper.
+
+    Takes a hash-map and a hiccup child vector:
+
+    hash-map:
+    :view keyword - Current view keyword that maps to one of the views below.
+
+    child:
+    Typically something like a hiccup [:box ...] vector
+
+    Returns hiccup :box vector."
+    [{:keys [view]} child]
+    [:box#base {:left   0
+                :right  0
+                :width  "100%"
+                :height "100%"}
+      ;(when (not= view :loader) [navbar])
+      [router {:key "2"}
+              :views {:home session}
+              :view view]
+      [:box { :bottom 0
+              :height "60%"
+              :style {:border { :fg :magenta}}
+              :border {:type :line}}
+        [repl]]
+      child]))
