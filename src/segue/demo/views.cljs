@@ -38,9 +38,11 @@
         sections       (rf/subscribe [:sections])
         playback-data  (rf/subscribe [:playback])
         toggle-mode    #(swap! grid-mode not)
-        play-pattern   #(rf/dispatch  [:play-pattern @row %2])
+        play-pattern   #(rf/dispatch [:play-pattern @row %2])
         select-next    #(rf/dispatch [:update-selection (+ @row 1)])
         select-prev    #(rf/dispatch [:update-selection (- @row 1)])
+        edit-section   #(rf/dispatch [:edit-pattern @row])
+        ;edit-section   #(rf/dispatch [:play-pattern 0 %2])
         old-channels [ {:name "p1" :def "# s \"supervibe\" # gain 0.8" :patterns [ "0 0 0*2 0"]}
                        {:name "p2" :def "# s \"gretsch\" # gain 0.8"   :patterns [ "0(3,8)" "0 0" "0*4" "degrade 8 $ \"0 0\""]}]]
     (fn [_]
@@ -57,8 +59,8 @@
                   { :toggle-mode toggle-mode
                     :select-next select-next
                     :select-prev select-prev
-                    ; :on-select  #(for [[idx channel] (map-indexed vector channels)] (do (println "playing" idx) (play-pattern % idx)))
                     :on-select  #(doall (for [[idx channel] (map-indexed vector @channels)] (play-pattern % idx)))
+                    :edit-section edit-section
                     :section-data  sections
                     :channel-data  channels
                     :playback playback-data
@@ -85,7 +87,6 @@
     [:box "this the editor, foo"]))
       
 
-
 (defn home
   "Main wrapper.
 
@@ -104,6 +105,7 @@
               :width  "100%"
               :height "100%"}
     [router {:key "2"
-             :views {:home editor-view}
+             :views {:edit editor-view
+                     :home session-view}
              :view view}]
     child])
