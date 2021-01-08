@@ -120,5 +120,8 @@
         (min (-> track :sections count (- 1)))
         (assoc db :session/selection)))))
 
-
-  
+(rf/reg-event-db
+  :edit-section ; FIXME: Rename it if this implementation remains
+  (fn [db [_]]
+    ;(let [selection @(rf/subscribe [:selection-content])]
+      (assoc-in db [:router/view] :edit)))
