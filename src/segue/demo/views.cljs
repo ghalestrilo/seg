@@ -78,6 +78,13 @@
           help]])))
 
 
+(defn editor-view
+  [_]
+  (r/with-let
+    [{:keys [column-width]} @(rf/subscribe [:settings])]
+    [:box "this the editor, foo"]))
+      
+
 
 (defn home
   "Main wrapper.
@@ -96,37 +103,7 @@
               :right  0
               :width  "100%"
               :height "100%"}
-    ;(when (not= view :loader) [navbar])
     [router {:key "2"
-             :views {:home session-view}
+             :views {:home editor-view}
              :view view}]
     child])
-
-(comment
-  (defn editor-view
-    "Main wrapper.
-
-    Takes a hash-map and a hiccup child vector:
-
-    hash-map:
-    :view keyword - Current view keyword that maps to one of the views below.
-
-    child:
-    Typically something like a hiccup [:box ...] vector
-
-    Returns hiccup :box vector."
-    [{:keys [view]} child]
-    [:box#base {:left   0
-                :right  0
-                :width  "100%"
-                :height "100%"}
-      ;(when (not= view :loader) [navbar])
-      [router {:key "2"}
-              :views {:home session}
-              :view view]
-      [:box { :bottom 0
-              :height "60%"
-              :style {:border { :fg :magenta}}
-              :border {:type :line}}
-        [repl]]
-      child]))
