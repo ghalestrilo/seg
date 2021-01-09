@@ -33,7 +33,7 @@
 
 (def default-settings
   { :column-width 12
-    :shell "zsh"
+    :shell "zsh"  ;TODO: check if process exists
     :editor "kak"})
 
 (rf/reg-event-db
@@ -125,19 +125,28 @@
         (assoc db :session/selection)))))
 
 (rf/reg-event-db
-  :edit-section ; FIXME: Rename it if this implementation remains
-  (fn [db [_]]
-    ;(let [selection @(rf/subscribe [:selection-content])]
-      (assoc-in db [:router/view] :edit)))
+  :edit-file
+  (fn [db [_ filename]]
+    (let [editor-process (-> db :editor :process)]
+      (if (some? editor-process)
+          (.kill ^js editor-process "SIGTERM"))
+      (let [{keys [editor]} settings]
+        (-> db
+          (assoc-in [:editor :process] (spawn-process (str editor filename)))                 
+          (assoc-in [:router/view] :edit))))))
 
-
-
-; Event Sequencers
-(defn edit-section
-  []
-  (let [selection @(rf/subscribe [:selection-content])
-        settings  @(rf/subscribe [:settings])
-        editor-process (:process @(rf/subscribe [:editor]))]
-    (let [{keys [shell editor]} settings]
-      (if (nil? editor-process)
-          (spawn-process editor)))))
+(comment
+  [:terminal
+   {:parent @screen
+    :cursor "line"
+    :cursorBlink true
+    :screenKeys false
+    :label " multiplex.js "
+    :left 0
+    :right 0
+    :width  "100%"
+    :height "100%"
+    :border "line"
+    :style {:fg "default"
+            :bg "default"
+            :focus {:border {:fg "green"}}}}])

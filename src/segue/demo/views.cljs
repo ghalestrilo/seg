@@ -8,6 +8,15 @@
    [segue.components :refer [help sidebar selection-display]]
    [segue.repl :refer [repl]]))
 
+; TODO: Move to routines.cljs (Event Sequencers)
+(defn edit-section
+  []
+  (let [selection @(rf/subscribe [:selection-content])
+        settings  @(rf/subscribe [:settings])]
+    (let [{keys [editor]} settings]
+      (rf/dispatch [:edit-file "~/.filename"]))))
+
+
 (defn navbar
   "Displays a blessed js box with a vertical-menu used for navigation.
   User can use j/k or up/down to navigate items and either enter or l to view
@@ -41,7 +50,6 @@
         play-pattern   #(rf/dispatch [:play-pattern @row %2])
         select-next    #(rf/dispatch [:update-selection (+ @row 1)])
         select-prev    #(rf/dispatch [:update-selection (- @row 1)])
-        edit-section   #(rf/dispatch [:edit-section])
         ;edit-section   #(rf/dispatch [:play-pattern 0 %2])
         old-channels [ {:name "p1" :def "# s \"supervibe\" # gain 0.8" :patterns [ "0 0 0*2 0"]}
                        {:name "p2" :def "# s \"gretsch\" # gain 0.8"   :patterns [ "0(3,8)" "0 0" "0*4" "degrade 8 $ \"0 0\""]}]]
