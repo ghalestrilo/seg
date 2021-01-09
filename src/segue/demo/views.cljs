@@ -4,6 +4,7 @@
    [clojure.string :refer [join]]
    [re-frame.core :as rf]
    [reagent.core :as r]
+   [segue.core :refer [screen]]
    [segue.views :refer [router vertical-menu player-grid session-section-mode]]
    [segue.components :refer [help sidebar selection-display]]
    [segue.repl :refer [repl]]))
@@ -94,9 +95,22 @@
   [_]
   (r/with-let
     [{:keys [column-width]} @(rf/subscribe [:settings])]
-    [:box {:width "100%" :height "100%"}
-      "this the editor, foo"
-      help]))
+    [:terminal
+      { :parent @screen
+        :cursor "block"
+        :cursorBlink true
+        :screenKeys false
+        :label " editor "
+        :args ["-c" "kak"]
+        :left 0
+        :right 0
+        :width  "100%"
+        :height "100%"
+        :border "line"
+        :style {:fg "default"
+                :bg "default"
+                :focus {:border {:fg "green"}}}}]))
+
       
 
 (defn home
