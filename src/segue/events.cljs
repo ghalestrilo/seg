@@ -5,7 +5,8 @@
   (:require
     [re-frame.core :as rf]
     [segue.track :refer [read-file prep-section load-track]]
-    [segue.repl :refer [spawn-process repl-send]]))
+    [segue.repl :refer [spawn-process repl-send]]
+    [segue.wrappers :refer [node-slurp]]))
 ; Below are very general effect handlers. While you can use these to get
 ; going quickly you are likely better off creating custom handlers for actions
 ; specific to your application.
@@ -130,7 +131,20 @@
           (assoc-in [:editor :filename] filename)
           (assoc-in [:router/view] :edit))))))
 
+(defn consume-temp-file
+  "Pushes content of temp file to current selection"
+  [db]
+  (if-let [filename (-> db :editor :filename)]
+    (let [selection (:session/selection db)
+          new-def   (node-slurp filename)]
+      (-> db :repl :process (repl-send new-def)) ;FIXME remove this, update definition, recalc section
+      ;(assoc-in db [:track :sections selection :definition] "new-def"))
+      db)
+    db))
+
 (rf/reg-event-db
   :navigate
   (fn [db [_ view]]
-    (assoc-in db [:router/view] view)))
+    (-> db
+      ((if (= view :home) consume-temp-file identity))
+      (assoc-in [:router/view] view))))
