@@ -36,7 +36,7 @@
   :init
   (fn [db [_ opts terminal-size]]
     {:opts opts
-     :settings { :column-width 12}
+     :settings { :column-width 12 :shell "zsh" :editor "kak"}
      :router/view :home
      :terminal/size terminal-size
      :dialog/help help-messages
@@ -125,3 +125,15 @@
   (fn [db [_]]
     ;(let [selection @(rf/subscribe [:selection-content])]
       (assoc-in db [:router/view] :edit)))
+
+
+
+; Event Sequencers
+(defn edit-section
+  []
+  (let [selection @(rf/subscribe [:selection-content])
+        settings  @(rf/subscribe [:settings])
+        editor-process (:process @(rf/subscribe [:editor]))]
+    (let [{keys [shell editor]} settings]
+      (if (nil? editor-process)
+          (spawn-process editor)))))

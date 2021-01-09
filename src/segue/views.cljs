@@ -103,7 +103,6 @@
                   :width "100%"
                   :height 1
                   :content label}])]))))
-            
 
 ; TODO: Move this
 (def colors

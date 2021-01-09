@@ -16,10 +16,8 @@
   [{:keys [items]}]
   (let [help-content @(rf/subscribe [:help])
         expanded false] ;TODO: move this state to :interface
-    [:box { :bottom 0
+    [:box { :top 0
             :style {:border {:fg :magenta}}}
-      ; for [[idx [value label]] (map-indexed vector options)]
-      ; (println help-content)
       (for [[idx [keyname action]] (map-indexed vector help-content)]
         [:text {:key idx :bottom idx :left 1} (str keyname " - " action)])]))
 

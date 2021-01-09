@@ -86,7 +86,9 @@
   [_]
   (r/with-let
     [{:keys [column-width]} @(rf/subscribe [:settings])]
-    [:box "this the editor, foo"]))
+    [:box {:width "100%" :height "100%"}
+      "this the editor, foo"
+      help]))
       
 
 (defn home
