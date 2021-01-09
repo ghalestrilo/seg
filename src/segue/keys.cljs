@@ -4,7 +4,8 @@
    [reagent.core :as r]))
 
 (def global-bindings
-  {["escape" "q" "C-c"] #(.exit js/process 0)})
+  ;{["escape" "q" "C-c"] #(.exit js/process 0)}
+  {["C-c"] #(.exit js/process 0)})
 
 (defn bind-keys
   "Set key bindings mapping keys to functions.

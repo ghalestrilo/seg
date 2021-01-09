@@ -31,6 +31,7 @@ ATM. I'm organizing the project roadmap via issues. Feel free to grab one and ta
 
 Update `track.cljs`, changing the filename at the end of the `:boot` parameter of the `:tidal` extension to point to yout boot file.
 Run `npm install`
+Run `./patch_node_pty.sh`
 
 Open two terminals on root folder
 

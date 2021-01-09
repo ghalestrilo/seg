@@ -1,10 +1,15 @@
 (ns segue.track
   (:require
-    [cljs.nodejs :as nodejs]
+    ;[cljs.nodejs :as nodejs]
     [re-frame.core :as rf]
     [clojure.spec.alpha :as s]
-    [clojure.string :as string]))
+    [clojure.string :as string]
+    [segue.wrappers :refer [node-slurp]]))
+    
 
+;(defn node-slurp [path]
+;    (let [fs (nodejs/require "fs")]
+;        (.readFileSync ^js fs path "utf8")))
 
 (s/def ::filename string?)
 ;(s/def ::syntax   #{:tidal :foxdot})
@@ -51,34 +56,10 @@
   []
   (:regexes (get-plugin)))
 
-; 1. Set syntax to state
-; 2. Functions subscribe to state in order to get syntax
-
-
-
-; TODO: Regexes on file reading
-; (defn! load-file)
-; tidal
-; - block: ( *).*(\n|(\1) +.*)*
-; - section: do(\n|^).*?(?=\n|$)
-;    shape: { variables (local): [], patterns,  }
-; - variable: 
-; - paragraph: (\ *(p\ *)\"\w+\"|d[1-8])((?:[^\n][\n]?)+)
-;     extracts individual command paragraphs
-; - channel: /(p\ )"\w+"|d[1-8]/
-;     with lookbehind: (?<=p \")([^\".]*)|(?<=d)[1-8]
-;     extracts channels from paragraph
-; - pattern modifier: /\$(\ |)\w+ .*/
-;     extracts pattern modifiers
-; - effect: /\#(\ |)\w+ ".*"/
-;     extracts effects from paragraph
-; - comment: /--.*/
-
-; (\1{,1})*
-
-(defn node-slurp [path]
-    (let [fs (nodejs/require "fs")]
-        (.readFileSync ^js fs path "utf8")))
+; FIXME: This should be constructed from its parts
+(defn get-definition
+  [section]
+  (:definition section))
 
 (defn read-file
   [filename]
@@ -125,14 +106,6 @@
   [the-map key f]
   (assoc the-map key (f the-map)))
 
-; TODO: Retrieve channels from global state array
-; NOTE:  This requires pushing to global state before calling this function.
-;        which means refactoring parse-content
-; IDEA: Create (set-track-field) events
-;  set :syntax before calling anything
-
-
-
 (defn get-section-name
   [text]
   (-> #"(?<=-- @name( ))\w+"
@@ -140,11 +113,10 @@
       first
       (or "?")))
 
-
 (defn get-section-statements
   [section]
   (let [regexes (get-regexes)]
-    (->>  (:definition section)
+    (->>  (get-definition section)
           (re-seq (:section-statement regexes))
           (map first) ; pick largest match
           flatten
@@ -175,8 +147,6 @@
       (assoc  :definition section-text)
       (fassoc :statements get-section-statements)  
       (fassoc :patterns get-pattern-list)
-      ;(dissoc :definition)
-      ;(dissoc :statements)
       (assoc  :name (get-section-name section-text)))))
 
 ; TODO: Move code @151 here
@@ -194,15 +164,14 @@
         flatten
         first)))
 
-
 (defn get-section-definitions
   [{:keys [block]}]
   (let [regexes (get-regexes)]
     (->> block
         (get-matches (:section regexes))
         (map (partial string/join ""))
-        flatten)))
-
+        flatten
+        (into []))))
 
 (defn get-sections
   [{:keys [section-definitions]}]
@@ -210,7 +179,8 @@
     (->> section-definitions
          (exclude-matches (:setup regexes))
          (into [])
-         (map parse-section))))
+         (map parse-section)
+         (into []))))
 
 
 
@@ -222,7 +192,6 @@
       (map (partial string/join ""))
       flatten
       first)))
-    ;"d2 $ s \"sn*2\" # orbit 0")
 
 ;; FIXME: This code is hideous
 (defn parse-content
@@ -239,11 +208,8 @@
 
       ; FIXME: This is a workaround for an incorrect regex
       (fassoc :section-definitions get-section-definitions)
-
-      ;(#(assoc % :sections (:section-definitions %)))
-      ;(dissoc :block)
       (fassoc :sections #(->> % :section-definitions (into []) (map parse-section)))
-      ;(fassoc :sections-new  get-sections)
+
       (dissoc :section-definitions)
       (fassoc :variables get-variables)
       (fassoc :setup     get-setup)
@@ -287,7 +253,6 @@
     (println "[info] track has no setup block: " track))
   (if-let [variables (:variables track)]
     (rf/dispatch-sync [:eval variables] variables)
-    ;(println (first variables))
     (println "[info] track has no variables block: " track)))
 
 
@@ -295,13 +260,10 @@
   [filename]
   (let [extension (-> filename (string/split ".") last)
         syntax    (-> extension keyword syntax-map)]
-    ;(rf/dispatch-sync [:set-track] {})
-    ;(rf/dispatch-sync [:repl-kill] {})
     (state-assoc :syntax extension)
     (update-track :syntax syntax)
     (state-assoc :file filename)
     (state-assoc :track (-> filename read-file (parse-content syntax)))
-    ; TODO: Start process here with plugin boot command
     (rf/dispatch-sync [:repl-start (-> syntax plugins :boot)])
     (run-track-setup @(rf/subscribe [:track]))))
 

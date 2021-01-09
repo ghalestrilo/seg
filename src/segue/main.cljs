@@ -21,26 +21,7 @@
   [_]
   (let [view @(rf/subscribe [:view])]
     [home {:view view}]))
-
-; (defn ui
-;   "Basic wrapper to show the demo app and the debug view half height.
-;   Returns hiccup vector."
-;   [_]
-;   [:terminal
-;    {:parent @screen
-;     :cursor "line"
-;     :cursorBlink true
-;     :screenKeys false
-;     :label " multiplex.js "
-;     :left 0
-;     :right 0
-;     :width  "100%"
-;     :height "100%"
-;     :border "line"
-;     :style {:fg "default"
-;             :bg "default"
-;             :focus {:border {:fg "green"}}}}])
-
+    
 (def cli-options
   [["-p" "--port PORT" "port number"
     :default 80

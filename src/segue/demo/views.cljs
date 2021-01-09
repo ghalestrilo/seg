@@ -4,9 +4,24 @@
    [clojure.string :refer [join]]
    [re-frame.core :as rf]
    [reagent.core :as r]
+   [segue.core :refer [screen]]
    [segue.views :refer [router vertical-menu player-grid session-section-mode]]
    [segue.components :refer [help sidebar selection-display]]
-   [segue.repl :refer [repl]]))
+   [segue.repl :refer [repl]]
+   [segue.keys :refer [with-keys]]
+   [segue.track :refer [get-definition]]
+   [segue.wrappers :refer [node-write]]))
+
+; TODO: Move to routines.cljs (Event Sequencers)
+(defn edit-section
+  []
+  (let [selection @(rf/subscribe [:selection-content])
+        settings  @(rf/subscribe [:settings])
+        filename  (str "/tmp/filename" ".tidal")]
+    (node-write filename (get-definition selection))
+    (let [{keys [editor]} settings]
+      (rf/dispatch [:edit-file filename]))))
+
 
 (defn navbar
   "Displays a blessed js box with a vertical-menu used for navigation.
@@ -28,13 +43,7 @@
                    :fg :black
                    :on-select #(rf/dispatch [:update {:router/view %}])}]])
 
-
-; (def grid-mode (r/atom true)) ; FIXME: why does this not work inside let?
-
-; (def s< (comp deref re-frame.core/subscribe))
-; (def s> re-frame.core/dispatch)
-
-(defn session
+(defn session-view
   [_]
   (r/with-let
        [{:keys [column-width]} @(rf/subscribe [:settings])
@@ -44,36 +53,78 @@
         sections       (rf/subscribe [:sections])
         playback-data  (rf/subscribe [:playback])
         toggle-mode    #(swap! grid-mode not)
-        play-pattern   #(rf/dispatch  [:play-pattern @row %2])
+        play-pattern   #(rf/dispatch [:play-pattern @row %2])
         select-next    #(rf/dispatch [:update-selection (+ @row 1)])
         select-prev    #(rf/dispatch [:update-selection (- @row 1)])
+        ;edit-section   #(rf/dispatch [:play-pattern 0 %2])
         old-channels [ {:name "p1" :def "# s \"supervibe\" # gain 0.8" :patterns [ "0 0 0*2 0"]}
                        {:name "p2" :def "# s \"gretsch\" # gain 0.8"   :patterns [ "0(3,8)" "0 0" "0*4" "degrade 8 $ \"0 0\""]}]]
     (fn [_]
-      [:box { :top 0
-              :style {:border { :fg :magenta}}
-              :border {:type :line}
-              :label (if @grid-mode " Choose Section " " Choose Pattern ")
-              :right 0
-              :width "100%"
-              :height "100%"}
-        (if @grid-mode
-              [session-section-mode
-                { :toggle-mode toggle-mode
-                  :select-next select-next
-                  :select-prev select-prev
-                  ; :on-select  #(for [[idx channel] (map-indexed vector channels)] (do (println "playing" idx) (play-pattern % idx)))
-                  :on-select  #(doall (for [[idx channel] (map-indexed vector @channels)] (play-pattern % idx)))
-                  :section-data  sections
-                  :channel-data  channels
-                  :playback playback-data
-                  :selected    @row
-                  :column-width column-width}]
-            [player-grid
-              {:options old-channels
-               :toggle-mode toggle-mode
-               :play-pattern play-pattern}])]))) 
+      [:box
+        [:box { :top 0
+                :style {:border { :fg :magenta}}
+                :border {:type :line}
+                :label (if @grid-mode " Choose Section " " Choose Pattern ")
+                :right 0
+                :width "100%"
+                :height "100%"}
+          (if @grid-mode
+                [session-section-mode
+                  { :toggle-mode toggle-mode
+                    :select-next select-next
+                    :select-prev select-prev
+                    :on-select  #(doall (for [[idx channel] (map-indexed vector @channels)] (play-pattern % idx)))
+                    :edit-section edit-section
+                    :section-data  sections
+                    :channel-data  channels
+                    :playback playback-data
+                    :selected    @row
+                    :column-width column-width}]
+              [player-grid
+                {:options old-channels}
+                :toggle-mode toggle-mode
+                :play-pattern play-pattern])]        
+        [:box { :bottom 0
+                :height "60%"
+                :style {:border { :fg :magenta}}
+                :border {:type :line}}
+          [repl]]
+        [sidebar { :label " Section Preview "}
+          selection-display
+          help]])))
 
+(defn editor-view [props]
+  (r/create-class
+    { :displayName "editor-view"
+      :component-did-mount
+        (fn [component]
+          (do (.focus (r/dom-node component))
+              (-> (r/dom-node component)
+                  ;(.-process) ; FIXME: What prop + callback do I have to access to detect return of child process
+                  (.on "close" #(rf/dispatch [:navigate :home])))))
+                  
+      
+      :component-did-update #(rf/dispatch [:navigate :home])
+      
+      :reagent-render
+      (let [{:keys [column-width editor]} @(rf/subscribe [:settings])
+            {:keys [filename]} @(rf/subscribe [:editor])]
+        (fn [props]
+          [:terminal
+            { :parent @screen
+              :cursor "block"
+              :cursorBlink true
+              :screenKeys false
+              :label " editor "
+              :args ["-c" (str editor " " filename)]
+              :left 0
+              :right 0
+              :width  "100%"
+              :height "100%"
+              :border "line"
+              :style {:fg "default"
+                      :bg "default"
+                      :focus {:border {:fg "green"}}}}]))}))
 
 
 (defn home
@@ -89,20 +140,14 @@
 
   Returns hiccup :box vector."
   [{:keys [view]} child]
-  [:box#base {:left   0
-              :right  0
-              :width  "100%"
-              :height "100%"}
-    ;(when (not= view :loader) [navbar])
-    [router {:key "2"
-             :views {:home session}
-             :view view}]
-    [:box { :bottom 0
-            :height "60%"
-            :style {:border { :fg :magenta}}
-            :border {:type :line}}
-      [repl]]
-    [sidebar { :label " Section Preview "}
-      selection-display
-      help]
-    child])
+  (with-keys @screen
+    {["C-home"] #(rf/dispatch [:navigate :home])}
+    [:box#base {:left   0
+                :right  0
+                :width  "100%"
+                :height "100%"}
+      [router {:key "2"
+                :views {:edit editor-view
+                        :home session-view}
+                :view view}]
+      child]))

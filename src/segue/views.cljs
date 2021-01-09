@@ -103,7 +103,6 @@
                   :width "100%"
                   :height 1
                   :content label}])]))))
-            
 
 ; TODO: Move this
 (def colors
@@ -226,7 +225,7 @@
 
 (defn session-section-mode
   "...docstring"
-  [{:keys [channel-data section-data playback selected on-select
+  [{:keys [channel-data section-data playback selected on-select edit-section
            toggle-mode select-next select-prev play-pattern column-width]}]
   ; Render
   (let [selected-row selected
@@ -234,7 +233,8 @@
       (with-keys @screen {["k" "up"]    select-prev
                           ["j" "down"]  select-next
                           ["l" "right"] toggle-mode
-                          ["e" "enter"] #(if on-select (on-select) (println "[session-section-mode] No on-select callback!"))}
+                          ["e"]         edit-section
+                          ["enter"]    #(if on-select (on-select) (println "[session-section-mode] No on-select callback!"))}
         [:box
           [section-row {:key "header" :cell-width width}
                        {:patterns @channel-data}]
