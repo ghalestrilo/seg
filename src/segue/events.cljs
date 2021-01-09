@@ -4,7 +4,7 @@
   https://github.com/Day8/re-frame/blob/master/docs/EffectfulHandlers.md"
   (:require
     [re-frame.core :as rf]
-    [segue.track :refer [read-file prep-section load-track]]
+    [segue.track :refer [read-file parse-section prep-section load-track]]
     [segue.repl :refer [spawn-process repl-send]]
     [segue.wrappers :refer [node-slurp]]))
 ; Below are very general effect handlers. While you can use these to get
@@ -137,9 +137,8 @@
   (if-let [filename (-> db :editor :filename)]
     (let [selection (:session/selection db)
           new-def   (node-slurp filename)]
-      (-> db :repl :process (repl-send new-def)) ;FIXME remove this, update definition, recalc section
-      ;(assoc-in db [:track :sections selection :definition] "new-def"))
-      db)
+      (update-in db [:track :sections]
+        #(assoc-in (into [] %) [selection] (parse-section new-def))))
     db))
 
 (rf/reg-event-db

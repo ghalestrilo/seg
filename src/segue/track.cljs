@@ -164,15 +164,14 @@
         flatten
         first)))
 
-
 (defn get-section-definitions
   [{:keys [block]}]
   (let [regexes (get-regexes)]
     (->> block
         (get-matches (:section regexes))
         (map (partial string/join ""))
-        flatten)))
-
+        flatten
+        (into []))))
 
 (defn get-sections
   [{:keys [section-definitions]}]
@@ -180,7 +179,8 @@
     (->> section-definitions
          (exclude-matches (:setup regexes))
          (into [])
-         (map parse-section))))
+         (map parse-section)
+         (into []))))
 
 
 
