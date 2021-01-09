@@ -60,6 +60,11 @@
   (fn [db _]
     (:settings db)))
 
+(rf/reg-sub
+  :editor
+  (fn [db _]
+    (:editor db)))
+
 ; NOTE: The two subs below and their calls must be updated to account for multi-select
 
 (rf/reg-sub

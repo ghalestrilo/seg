@@ -125,9 +125,9 @@
     (let [editor-process (-> db :editor :process)]
       (if (some? editor-process)
           (.kill ^js editor-process "SIGTERM"))
-      (let [{keys [editor]} settings]
+      (let [{keys [editor]} (:settings db)]
         (-> db
-          (assoc-in [:editor :process] (spawn-process (str editor filename)))                 
+          (assoc-in [:editor :filename] filename)
           (assoc-in [:router/view] :edit))))))
 
 (rf/reg-event-db

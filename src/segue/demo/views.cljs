@@ -8,15 +8,19 @@
    [segue.views :refer [router vertical-menu player-grid session-section-mode]]
    [segue.components :refer [help sidebar selection-display]]
    [segue.repl :refer [repl]]
-   [segue.keys :refer [with-keys]]))
+   [segue.keys :refer [with-keys]]
+   [segue.track :refer [get-definition]]
+   [segue.wrappers :refer [node-write]]))
 
 ; TODO: Move to routines.cljs (Event Sequencers)
 (defn edit-section
   []
   (let [selection @(rf/subscribe [:selection-content])
-        settings  @(rf/subscribe [:settings])]
+        settings  @(rf/subscribe [:settings])
+        filename  (str "/tmp/filename" ".tidal")]
+    (node-write filename (get-definition selection))
     (let [{keys [editor]} settings]
-      (rf/dispatch [:edit-file "~/.filename"]))))
+      (rf/dispatch [:edit-file filename]))))
 
 
 (defn navbar
@@ -103,7 +107,8 @@
       :component-did-update #(rf/dispatch [:navigate :home])
       
       :reagent-render
-      (let [{:keys [column-width editor]} @(rf/subscribe [:settings])]
+      (let [{:keys [column-width editor]} @(rf/subscribe [:settings])
+            {:keys [filename]} @(rf/subscribe [:editor])]
         (fn [props]
           [:terminal
             { :parent @screen
@@ -111,7 +116,7 @@
               :cursorBlink true
               :screenKeys false
               :label " editor "
-              :args ["-c" editor]
+              :args ["-c" (str editor " " filename)]
               :left 0
               :right 0
               :width  "100%"

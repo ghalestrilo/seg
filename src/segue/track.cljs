@@ -1,10 +1,15 @@
 (ns segue.track
   (:require
-    [cljs.nodejs :as nodejs]
+    ;[cljs.nodejs :as nodejs]
     [re-frame.core :as rf]
     [clojure.spec.alpha :as s]
-    [clojure.string :as string]))
+    [clojure.string :as string]
+    [segue.wrappers :refer [node-slurp]]))
+    
 
+;(defn node-slurp [path]
+;    (let [fs (nodejs/require "fs")]
+;        (.readFileSync ^js fs path "utf8")))
 
 (s/def ::filename string?)
 ;(s/def ::syntax   #{:tidal :foxdot})
@@ -51,34 +56,10 @@
   []
   (:regexes (get-plugin)))
 
-; 1. Set syntax to state
-; 2. Functions subscribe to state in order to get syntax
-
-
-
-; TODO: Regexes on file reading
-; (defn! load-file)
-; tidal
-; - block: ( *).*(\n|(\1) +.*)*
-; - section: do(\n|^).*?(?=\n|$)
-;    shape: { variables (local): [], patterns,  }
-; - variable: 
-; - paragraph: (\ *(p\ *)\"\w+\"|d[1-8])((?:[^\n][\n]?)+)
-;     extracts individual command paragraphs
-; - channel: /(p\ )"\w+"|d[1-8]/
-;     with lookbehind: (?<=p \")([^\".]*)|(?<=d)[1-8]
-;     extracts channels from paragraph
-; - pattern modifier: /\$(\ |)\w+ .*/
-;     extracts pattern modifiers
-; - effect: /\#(\ |)\w+ ".*"/
-;     extracts effects from paragraph
-; - comment: /--.*/
-
-; (\1{,1})*
-
-(defn node-slurp [path]
-    (let [fs (nodejs/require "fs")]
-        (.readFileSync ^js fs path "utf8")))
+; FIXME: This should be constructed from its parts
+(defn get-definition
+  [section]
+  (:definition section))
 
 (defn read-file
   [filename]
@@ -135,7 +116,7 @@
 (defn get-section-statements
   [section]
   (let [regexes (get-regexes)]
-    (->>  (:definition section)
+    (->>  (get-definition section)
           (re-seq (:section-statement regexes))
           (map first) ; pick largest match
           flatten
