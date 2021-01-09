@@ -125,21 +125,12 @@
   [the-map key f]
   (assoc the-map key (f the-map)))
 
-; TODO: Retrieve channels from global state array
-; NOTE:  This requires pushing to global state before calling this function.
-;        which means refactoring parse-content
-; IDEA: Create (set-track-field) events
-;  set :syntax before calling anything
-
-
-
 (defn get-section-name
   [text]
   (-> #"(?<=-- @name( ))\w+"
       (re-find text)
       first
       (or "?")))
-
 
 (defn get-section-statements
   [section]
@@ -175,8 +166,6 @@
       (assoc  :definition section-text)
       (fassoc :statements get-section-statements)  
       (fassoc :patterns get-pattern-list)
-      ;(dissoc :definition)
-      ;(dissoc :statements)
       (assoc  :name (get-section-name section-text)))))
 
 ; TODO: Move code @151 here
@@ -222,7 +211,6 @@
       (map (partial string/join ""))
       flatten
       first)))
-    ;"d2 $ s \"sn*2\" # orbit 0")
 
 ;; FIXME: This code is hideous
 (defn parse-content
@@ -239,11 +227,8 @@
 
       ; FIXME: This is a workaround for an incorrect regex
       (fassoc :section-definitions get-section-definitions)
-
-      ;(#(assoc % :sections (:section-definitions %)))
-      ;(dissoc :block)
       (fassoc :sections #(->> % :section-definitions (into []) (map parse-section)))
-      ;(fassoc :sections-new  get-sections)
+
       (dissoc :section-definitions)
       (fassoc :variables get-variables)
       (fassoc :setup     get-setup)
@@ -287,7 +272,6 @@
     (println "[info] track has no setup block: " track))
   (if-let [variables (:variables track)]
     (rf/dispatch-sync [:eval variables] variables)
-    ;(println (first variables))
     (println "[info] track has no variables block: " track)))
 
 
@@ -295,13 +279,10 @@
   [filename]
   (let [extension (-> filename (string/split ".") last)
         syntax    (-> extension keyword syntax-map)]
-    ;(rf/dispatch-sync [:set-track] {})
-    ;(rf/dispatch-sync [:repl-kill] {})
     (state-assoc :syntax extension)
     (update-track :syntax syntax)
     (state-assoc :file filename)
     (state-assoc :track (-> filename read-file (parse-content syntax)))
-    ; TODO: Start process here with plugin boot command
     (rf/dispatch-sync [:repl-start (-> syntax plugins :boot)])
     (run-track-setup @(rf/subscribe [:track]))))
 

@@ -7,7 +7,8 @@
    [segue.core :refer [screen]]
    [segue.views :refer [router vertical-menu player-grid session-section-mode]]
    [segue.components :refer [help sidebar selection-display]]
-   [segue.repl :refer [repl]]))
+   [segue.repl :refer [repl]]
+   [segue.keys :refer [with-keys]]))
 
 ; TODO: Move to routines.cljs (Event Sequencers)
 (defn edit-section
@@ -88,52 +89,37 @@
           selection-display
           help]])))
 
-(comment
-  (defn editor-view
-    "Editor View
-    Runs a shell with an editor inside"
-    [_]
-    (r/with-let
-      [{:keys [column-width editor]} @(rf/subscribe [:settings])]
-      (let [term [:terminal
-                          { :parent @screen
-                            :cursor "block"
-                            :cursorBlink true
-                            :screenKeys false
-                            :label " editor "
-                            :args ["-c" editor]
-                            :left 0
-                            :right 0
-                            :width  "100%"
-                            :height "100%"
-                            :border "line"
-                            :style {:fg "default"
-                                    :bg "default"
-                                    :focus {:border {:fg "green"}}}}]]
-        term))))
-
-
 (defn editor-view [props]
-  (r/create-class {:displayName "editor-view"
-                   :component-did-mount (fn [component] (.focus (r/dom-node component)))
-                   :reagent-render
-                    (let [{:keys [column-width editor]} @(rf/subscribe [:settings])]
-                      (fn [props]
-                        [:terminal
-                          { :parent @screen
-                            :cursor "block"
-                            :cursorBlink true
-                            :screenKeys false
-                            :label " editor "
-                            :args ["-c" editor]
-                            :left 0
-                            :right 0
-                            :width  "100%"
-                            :height "100%"
-                            :border "line"
-                            :style {:fg "default"
-                                    :bg "default"
-                                    :focus {:border {:fg "green"}}}}]))}))
+  (r/create-class
+    { :displayName "editor-view"
+      :component-did-mount
+        (fn [component]
+          (do (.focus (r/dom-node component))
+              (-> (r/dom-node component)
+                  ;(.-process) ; FIXME: What prop + callback do I have to access to detect return of child process
+                  (.on "close" #(rf/dispatch [:navigate :home])))))
+                  
+      
+      :component-did-update #(rf/dispatch [:navigate :home])
+      
+      :reagent-render
+      (let [{:keys [column-width editor]} @(rf/subscribe [:settings])]
+        (fn [props]
+          [:terminal
+            { :parent @screen
+              :cursor "block"
+              :cursorBlink true
+              :screenKeys false
+              :label " editor "
+              :args ["-c" editor]
+              :left 0
+              :right 0
+              :width  "100%"
+              :height "100%"
+              :border "line"
+              :style {:fg "default"
+                      :bg "default"
+                      :focus {:border {:fg "green"}}}}]))}))
 
 
 (defn home
@@ -149,12 +135,14 @@
 
   Returns hiccup :box vector."
   [{:keys [view]} child]
-  [:box#base {:left   0
-              :right  0
-              :width  "100%"
-              :height "100%"}
-    [router {:key "2"
-             :views {:edit editor-view
-                     :home session-view}
-             :view view}]
-    child])
+  (with-keys @screen
+    {["C-home"] #(rf/dispatch [:navigate :home])}
+    [:box#base {:left   0
+                :right  0
+                :width  "100%"
+                :height "100%"}
+      [router {:key "2"
+                :views {:edit editor-view
+                        :home session-view}
+                :view view}]
+      child]))

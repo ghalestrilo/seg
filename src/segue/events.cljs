@@ -71,14 +71,10 @@
   :play-pattern
   (fn [db [_ row column]]
     ; Case 1: Playing a section
-    (println "playing" row column)
     (if-let [repl         (:repl db)]
       (if-let [section      (-> db :track :sections (nth row {}))]
         ;(println "section:" (prep-section section))
         (-> repl :process (repl-send (prep-section section))))) ; FIXME: find section definition
-        ;(when-let [section-code (:definition section)]
-        ;    (-> repl :process (repl-send section-code)) ; FIXME: find section definition
-        ;    (println "section code:" section-code))))
     (assoc db :playback {:section row
                          :patterns (-> db :track :channels count (take (repeat row)))})))
 
@@ -97,7 +93,7 @@
     (update-in db [:repl :messages]
       #(->> message
         (str %)
-        (take-last 5000) ; improve this logic to account for 
+        (take-last 5000) ; improve this logic to account for newline characters
         (clojure.string/join "")
         (str)))))
 
@@ -112,7 +108,6 @@
   (fn [db [_ command]]
     (if-let [{:keys [repl]} db]
       (-> repl :process (repl-send command)))    
-    ;(println command)
     db))
 
 (rf/reg-event-db
@@ -135,18 +130,7 @@
           (assoc-in [:editor :process] (spawn-process (str editor filename)))                 
           (assoc-in [:router/view] :edit))))))
 
-(comment
-  [:terminal
-   {:parent @screen
-    :cursor "line"
-    :cursorBlink true
-    :screenKeys false
-    :label " multiplex.js "
-    :left 0
-    :right 0
-    :width  "100%"
-    :height "100%"
-    :border "line"
-    :style {:fg "default"
-            :bg "default"
-            :focus {:border {:fg "green"}}}}])
+(rf/reg-event-db
+  :navigate
+  (fn [db [_ view]]
+    (assoc-in db [:router/view] view)))
