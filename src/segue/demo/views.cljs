@@ -88,30 +88,53 @@
           selection-display
           help]])))
 
+(comment
+  (defn editor-view
+    "Editor View
+    Runs a shell with an editor inside"
+    [_]
+    (r/with-let
+      [{:keys [column-width editor]} @(rf/subscribe [:settings])]
+      (let [term [:terminal
+                          { :parent @screen
+                            :cursor "block"
+                            :cursorBlink true
+                            :screenKeys false
+                            :label " editor "
+                            :args ["-c" editor]
+                            :left 0
+                            :right 0
+                            :width  "100%"
+                            :height "100%"
+                            :border "line"
+                            :style {:fg "default"
+                                    :bg "default"
+                                    :focus {:border {:fg "green"}}}}]]
+        term))))
 
-(defn editor-view
-  "Editor View
-  Runs a shell with an editor inside"
-  [_]
-  (r/with-let
-    [{:keys [column-width]} @(rf/subscribe [:settings])]
-    [:terminal
-      { :parent @screen
-        :cursor "block"
-        :cursorBlink true
-        :screenKeys false
-        :label " editor "
-        :args ["-c" "kak"]
-        :left 0
-        :right 0
-        :width  "100%"
-        :height "100%"
-        :border "line"
-        :style {:fg "default"
-                :bg "default"
-                :focus {:border {:fg "green"}}}}]))
 
-      
+(defn editor-view [props]
+  (r/create-class {:displayName "editor-view"
+                   :component-did-mount (fn [component] (.focus (r/dom-node component)))
+                   :reagent-render
+                    (let [{:keys [column-width editor]} @(rf/subscribe [:settings])]
+                      (fn [props]
+                        [:terminal
+                          { :parent @screen
+                            :cursor "block"
+                            :cursorBlink true
+                            :screenKeys false
+                            :label " editor "
+                            :args ["-c" editor]
+                            :left 0
+                            :right 0
+                            :width  "100%"
+                            :height "100%"
+                            :border "line"
+                            :style {:fg "default"
+                                    :bg "default"
+                                    :focus {:border {:fg "green"}}}}]))}))
+
 
 (defn home
   "Main wrapper.
