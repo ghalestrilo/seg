@@ -13,11 +13,15 @@
    [segue.wrappers :refer [node-write]]))
 
 ; TODO: Move to routines.cljs (Event Sequencers)
+(defn generate-filename
+  []
+  (str "/tmp/seg-" (.getTime (new js/Date)) ".tidal"))
+
 (defn edit-section
   []
   (let [selection @(rf/subscribe [:selection-content])
         settings  @(rf/subscribe [:settings])
-        filename  (str "/tmp/filename" ".tidal")]
+        filename  (generate-filename)]
     (node-write filename (get-definition selection))
     (let [{keys [editor]} settings]
       (rf/dispatch [:edit-file filename]))))
@@ -56,7 +60,6 @@
         play-pattern   #(rf/dispatch [:play-pattern @row %2])
         select-next    #(rf/dispatch [:update-selection (+ @row 1)])
         select-prev    #(rf/dispatch [:update-selection (- @row 1)])
-        ;edit-section   #(rf/dispatch [:play-pattern 0 %2])
         old-channels [ {:name "p1" :def "# s \"supervibe\" # gain 0.8" :patterns [ "0 0 0*2 0"]}
                        {:name "p2" :def "# s \"gretsch\" # gain 0.8"   :patterns [ "0(3,8)" "0 0" "0*4" "degrade 8 $ \"0 0\""]}]]
     (fn [_]
