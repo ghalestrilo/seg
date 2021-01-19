@@ -1,0 +1,51 @@
+(* Sample grammar in ebnf notation *)
+
+track = statement (<newline> | <newline> statement)*
+
+statement = section
+  | (channel|"") <space*> (comment|"")
+  
+comment = <"#" space> (seg-command|"") #'(\w+| )*$'
+section = <"def"> <space> word <"():"> (<indent> statement)+
+channel = name <space ">>" space> word <"(">
+  ((pattern | parameter) (<"," space> parameter)* | "") <")">
+  effect*
+  (<space ("+") space> exp)*
+
+parameter = name <space* "=" space*> exp
+effect = <"." word "("> exp <")">
+
+indent = #"\n +"
+
+newline = "\n"
+space = #'\s'
+word = #'\w+'
+name = #'\w+'
+
+pattern = exp
+
+exp = word | tuple | list | exp"/"exp | string | integer | float
+
+tuple = <"(" space*> enumcontent <space* ")">
+list  = <"[" space*> enumcontent <space* "]">
+enumcontent = exp (<"," space*> exp)* | ""
+
+integer = #'[0-9]+'
+float = #'[0-9]+\.[0-9]+'
+string = <"\"">word*<"\"">
+
+(* Seg BNF *)
+seg-command = <"@"> name
+
+
+
+
+
+(*
+arglist = <"("> ((pattern | parameter) (<"," space> parameter)* | "") <")">
+pattern = "P"(tuple | list | word arglist)
+*)
+
+
+
+

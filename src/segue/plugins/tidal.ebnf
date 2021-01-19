@@ -1,0 +1,47 @@
+(* Sample grammar in ebnf notation *)
+
+track = statement (<newline> | <newline> statement)*
+
+statement = section
+  | comment
+  | channel-command
+
+channel-command
+    = channel <space> parameter* <param-sep space> pattern effect* 
+    | channel exp
+
+channel = <"p" space "\""> name <"\"" space>
+parameter = <space param-sep space> word <space> exp*
+effect    = <space fx-sep    space> word <space> exp*
+
+pattern-function = "s"|"n"|"note"
+pattern = pattern-function space exp | "silence"
+
+comment = #'--' <space> (seg-command | '') (word|<space>)*
+seg-command = "@" name
+
+section = <#"do"> (<indent> statement)+
+indent = #"\n +"
+
+
+exp = word | string | integer | float
+integer = #'[0-9]+'
+float = #'[0-9]+.[0-9]+'
+
+
+
+
+param = #'\w+'
+param_name = #'\w+'
+param-sep = "$"
+fx-sep = "#"
+
+blank = newline* | space
+newline = "\n"
+name = #'\w+'
+word = #'\w+'
+comma = ','
+space = #'\s'*
+
+string = <"\"">word*<"\"">
+
