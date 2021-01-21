@@ -3,6 +3,7 @@
                 [org.clojure/clojurescript "1.10.516"]
                 [org.clojure/tools.cli "0.4.1"]
                 [clj-commons/clj-yaml "0.7.0"]
+                [instaparse "1.4.10"]
                 [mount "0.1.15"]
                 [reagent "0.8.1" :exclusions [[cljsjs/react]
                                               [cljsjs/react-dom]
@@ -13,7 +14,7 @@
                 :target     :node-script
                 :devtools   {:after-load       segue.app/reload!}
                 :dev        {:main             segue.app/main!
-                             :output-to        "target/js/compiled/segue.js"
+                             :output-to        "target/js/compiled/seg.js"
                              :output-dir       "target/js/compiled/dev"}
                 :release    {:main             segue.main/main!
                              :compiler-options {:optimizations :simple}}}
