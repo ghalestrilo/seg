@@ -24,8 +24,8 @@
 ; TODO: load yaml fields
 (defn load-plugin
   [plugin-name]
-  (let [syntax (-> (str plugindir plugin-name ".ebnf") node-slurp ip/parser)]
-    { :syntax syntax
+  (let [parser (-> (str plugindir plugin-name ".ebnf") node-slurp ip/parser)]
+    { :parser parser
       :props ""}))
 
 (def plugins

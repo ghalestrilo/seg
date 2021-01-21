@@ -22,6 +22,9 @@
    :py    :foxdot})
 
 
+
+; ---------------------------------------------------------- FIXME: Legacy Code
+
 ; FIXME: This should be constructed from its parts
 (defn get-definition
   [section]
@@ -148,8 +151,6 @@
          (map parse-section)
          (into []))))
 
-
-
 (defn get-variables
   [{:keys [block]}]
   (let [regexes (legacy-get-regexes)]
@@ -211,6 +212,7 @@
   (->> section :definition str prep-command)) ; FIXME: This returns nil
   ;section)
 
+; ---------------------------------------------------------- FIXME: /Legacy Code
 
 (defn run-track-setup
   [track]
@@ -225,7 +227,9 @@
 (defn parse-content
   [file-content syntax-name]
   (let [plugin  (get-plugin syntax-name)
-        content {"haha" "haha"}]
+        parser  (:parser plugin)
+        content (parser file-content)]
+        ;content {:haha "haha"}]
     (println "instaparsed content:")
     (println content)
     content))
