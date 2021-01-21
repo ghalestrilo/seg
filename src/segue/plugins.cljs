@@ -4,7 +4,6 @@
     [segue.wrappers :refer [node-slurp]]))
 
 ; WIP
-
 (defn -js->clj+
   "For cases when built-in js->clj doesn't work. Source: https://stackoverflow.com/a/32583549/4839573"
   [x]
@@ -24,12 +23,13 @@
 
 (defn load-plugin
   [plugin-name]
-  {:syntax (-> (str plugindir plugin-name ".ebnf") node-slurp ip/parser)
-   :props ""})
+  (let [syntax (-> (str plugindir plugin-name ".ebnf") node-slurp ip/parser)]
+    (println syntax)
+    { :syntax syntax
+      :props ""}))
 
 (def new-plugins
   {:tidal (load-plugin "tidal")})
-
 
 ; FIXME: LEGACY CODE
 
