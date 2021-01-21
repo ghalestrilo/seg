@@ -21,21 +21,21 @@
 
 (def plugindir (str configdir "plugins/"))
 
+; TODO: load yaml fields
 (defn load-plugin
   [plugin-name]
   (let [syntax (-> (str plugindir plugin-name ".ebnf") node-slurp ip/parser)]
-    (println syntax)
     { :syntax syntax
       :props ""}))
 
-(def new-plugins
+(def plugins
   {:tidal (load-plugin "tidal")})
 
 ; FIXME: LEGACY CODE
 
 ; TODO:
 ; 2. Select and label final regexes
-(def plugins
+(def legacy-plugins
   {:tidal
     { :regexes
       { :statement        #"^(.+)(\n*( ).*)*"   ; t1 (top-level) regex. Will be run before all
@@ -54,13 +54,12 @@
       :boot "ghci -ghci-script /home/ghales/git/libtidal/boot.tidal"
       :prep-command
         { :pre  ":{"
-          :post ":}"}}
-   :new new-plugins})
+          :post ":}"}}})
 
-(defn get-plugin
+(defn legacy-get-plugin
   []
-  (:tidal plugins))
+  (:tidal legacy-plugins))
 
-(defn get-regexes
+(defn legacy-get-regexes
   []
-  (:regexes (get-plugin)))
+  (:regexes (legacy-get-plugin)))

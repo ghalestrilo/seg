@@ -5,7 +5,7 @@
     [clojure.spec.alpha :as s]
     [clojure.string :as string]
     [segue.wrappers :refer [node-slurp]]
-    [segue.plugins :refer  [plugins get-plugin get-regexes]]))
+    [segue.plugins :refer  [plugins legacy-plugins legacy-get-plugin legacy-get-regexes load-plugin]]))
     
 
 ;(defn node-slurp [path]
@@ -63,7 +63,7 @@
 
 (defn get-syntax-field
   [fieldname strings]
-  (let [syntax (:regexes (get-plugin))] ; TODO: subscribe to syntax, substituting :tidal
+  (let [syntax (:regexes (legacy-get-plugin))] ; TODO: subscribe to syntax, substituting :tidal
     (get-matches (get fieldname syntax) strings)))
 
 (defn fassoc
@@ -80,7 +80,7 @@
 
 (defn get-section-statements
   [section]
-  (let [regexes (get-regexes)]
+  (let [regexes (legacy-get-regexes)]
     (->>  (get-definition section)
           (re-seq (:section-statement regexes))
           (map first) ; pick largest match
@@ -89,7 +89,7 @@
 
 (defn get-pattern-list
   [section]
-  (let [regexes       (get-regexes)
+  (let [regexes       (legacy-get-regexes)
         channels      (->> @(rf/subscribe [:track]) :channels (map keyword))
         statements    (:statements section)
         channel-regex (:channel regexes)
@@ -107,7 +107,7 @@
 
 (defn parse-section
   [section-text]
-  (let [regexes (get-regexes)]
+  (let [regexes (legacy-get-regexes)]
     (-> {}
       (assoc  :definition section-text)
       (fassoc :statements get-section-statements)  
@@ -122,7 +122,7 @@
 (defn get-setup
   [{:keys [block]}]
   ;"d1 $ s \"bd\""
-  (let [regexes (get-regexes)]
+  (let [regexes (legacy-get-regexes)]
     (->> block
         (get-matches (:setup regexes))
         (map (partial string/join ""))
@@ -131,7 +131,7 @@
 
 (defn get-section-definitions
   [{:keys [block]}]
-  (let [regexes (get-regexes)]
+  (let [regexes (legacy-get-regexes)]
     (->> block
         (get-matches (:section regexes))
         (map (partial string/join ""))
@@ -140,7 +140,7 @@
 
 (defn get-sections
   [{:keys [section-definitions]}]
-  (let [regexes (get-regexes)]
+  (let [regexes (legacy-get-regexes)]
     (->> section-definitions
          (exclude-matches (:setup regexes))
          (into [])
@@ -151,7 +151,7 @@
 
 (defn get-variables
   [{:keys [block]}]
-  (let [regexes (get-regexes)]
+  (let [regexes (legacy-get-regexes)]
     (->> block
       (get-matches (:variable-block regexes))
       (map (partial string/join ""))
@@ -159,9 +159,9 @@
       first)))
 
 ;; FIXME: This code is hideous
-(defn parse-content
+(defn legacy-parse-content
   [content & {:keys [syntax]}]
-  (let [regexes (:regexes (get-plugin))
+  (let [regexes (:regexes (legacy-get-plugin))
         assoc-track-field #(assoc %1 %2 (get-track-field content regexes %2))]
     (-> {}
       (assoc-track-field :channel)
@@ -221,6 +221,17 @@
     (println "[info] track has no variables block: " track)))
 
 
+(defn parse-content
+  [syntax-name file-content]
+  (let [plugin  (load-plugin syntax-name)
+        content {"haha" "haha"}]
+        
+    (println "instaparsed content:")
+    (println content)
+    content))
+  
+  
+
 (defn load-track
   [filename]
   (let [extension (-> filename (string/split ".") last)
@@ -228,7 +239,11 @@
     (state-assoc :syntax extension)
     (update-track :syntax syntax)
     (state-assoc :file filename)
-    (state-assoc :track (-> filename read-file (parse-content syntax)))
-    (rf/dispatch-sync [:repl-start (-> syntax plugins :boot)])
+
+    ;(state-assoc :track (-> filename read-file (parse-content syntax)))
+
+    ; FIXME: LEGACY CODE
+    (state-assoc :track (-> filename read-file (legacy-parse-content syntax)))
+    (rf/dispatch-sync [:repl-start (-> syntax legacy-plugins :boot)])
     (run-track-setup @(rf/subscribe [:track]))))
 
