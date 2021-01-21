@@ -1,10 +1,18 @@
+
+
 (* Sample grammar in ebnf notation *)
 
-track = statement (<newline> | <newline> statement)*
+track = <blank> statement (<blank> | <newline> statement)*
 
 statement = section
   | comment
   | channel-command
+  | variable-block
+  | word (<space> exp)+
+  
+variable-block = <"let" space> variable*
+
+variable = (name <space>)+ "=" <space> value
 
 channel-command
     = channel <space> parameter* <param-sep space> pattern effect* 
@@ -17,31 +25,37 @@ effect    = <space fx-sep    space> word <space> exp*
 pattern-function = "s"|"n"|"note"
 pattern = pattern-function space exp | "silence"
 
-comment = #'--' <space> (seg-command | '') (word|<space>)*
+
+comment = "--" (seg-command | #"[^\n]*")*
 seg-command = "@" name
 
 section = <#"do"> (<indent> statement)+
 indent = #"\n +"
 
+exp = word
+    | string
+    | integer
+    | float
+    | "(" <blank> exp (<space> exp)* <blank> ")"
+    | operator
 
-exp = word | string | integer | float
 integer = #'[0-9]+'
 float = #'[0-9]+.[0-9]+'
 
-
-
+operator = #"\B(\+|\-|\/|\*|\=|\<|\>|\.|\#|\$|\^|\&|\!|\%|\~|\|)+\B"
 
 param = #'\w+'
 param_name = #'\w+'
 param-sep = "$"
 fx-sep = "#"
 
-blank = newline* | space
+blank = newline* | space*
 newline = "\n"
 name = #'\w+'
-word = #'\w+'
+value = exp
+word = #"(?!(let|do|--|[0-9]))\b\w+" <space>*
 comma = ','
 space = #'\s'*
 
-string = <"\"">word*<"\"">
+string = #"\"[^\"]*\""
 
