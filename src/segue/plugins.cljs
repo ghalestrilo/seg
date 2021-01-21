@@ -31,6 +31,14 @@
 (def plugins
   {:tidal (load-plugin "tidal")})
 
+(defn get-plugin
+  [plugin-name]
+  (->> plugin-name keyword (get plugins)))
+
+
+
+
+
 ; FIXME: LEGACY CODE
 
 ; TODO:
