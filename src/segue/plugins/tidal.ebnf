@@ -12,27 +12,28 @@ statement = section
   
 variable-block = <"let" space> variable*
 
-variable = (name <space>)+ "=" <space> value
-
 channel-command
     = channel <space> parameter* <param-sep space> pattern effect* 
     | channel exp
 
-channel = <"p" space "\""> name <"\"" space>
+channel   = <"p" space "\""> name <"\"" space>
 parameter = <space param-sep space> word <space> exp*
 effect    = <space fx-sep    space> word <space> exp*
+pattern   = pattern-function space exp | "silence"
+variable  = (name <space>)+ "=" <space> value
 
-pattern-function = "s"|"n"|"note"
-pattern = pattern-function space exp | "silence"
+<pattern-function> = "s"|"n"|"note"
 
 
-comment = "--" (seg-command | #"[^\n]*")*
-seg-command = "@" name
+
+comment = <"--"> (seg-command | space | #"\b[^\n^]*\b")*
+seg-command = <"@"> name
 
 section = <#"do"> (<indent> statement)+
 indent = #"\n +"
 
-exp = word
+
+<exp> = word
     | string
     | integer
     | float
@@ -53,7 +54,7 @@ blank = newline* | space*
 newline = "\n"
 name = #'\w+'
 value = exp
-word = #"(?!(let|do|--|[0-9]))\b\w+" <space>*
+<word> = #"(?!(let|do|--|[0-9]))\b\w+" <space>*
 comma = ','
 space = #'\s'*
 
