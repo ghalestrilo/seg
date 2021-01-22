@@ -1,7 +1,8 @@
 (ns segue.plugins
   (:require
     [instaparse.core :as ip]
-    [segue.wrappers :refer [node-slurp]]))
+    [segue.wrappers :refer [node-slurp]]
+    [clojure.walk :refer [walk]]))
 
 ; WIP
 (defn -js->clj+
@@ -24,7 +25,7 @@
 ; TODO: load yaml fields
 (defn load-plugin
   [plugin-name]
-  (let [parser (-> (str plugindir plugin-name ".ebnf") node-slurp (ip/parser))]
+  (let [parser (-> (str plugindir plugin-name ".ebnf") node-slurp (ip/parser))] ;:unhide :all))]
     { :parser parser
       :props ""}))
 
@@ -36,8 +37,15 @@
   (->> plugin-name keyword (get plugins)))
 
 
+(def unparse
+  "Generates a string from a parsed content tree
+  Useful for saving/outputting contents to file and previewing sections"
+  (comp (partial reduce str)
+        (partial filter #(not (keyword? %)))
+        flatten))
 
 
+;(comp (partial reduce str) flatten)
 
 ; FIXME: LEGACY CODE
 
