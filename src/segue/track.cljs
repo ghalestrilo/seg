@@ -5,7 +5,7 @@
     [clojure.spec.alpha :as s]
     [clojure.string :as string]
     [segue.wrappers :refer [node-slurp]]
-    [segue.plugins :refer  [get-plugin unparse
+    [segue.plugins :refer  [get-plugin unparse get-nodes
                             legacy-plugins legacy-get-plugin legacy-get-regexes]])) ;; FIXME delete legacy code
     
 
@@ -226,13 +226,12 @@
 
 (defn parse-content
   [file-content syntax-name]
-  (let [plugin  (get-plugin syntax-name)
-        parser  (:parser plugin)
-        content (parser file-content)]
-        ;content {:haha "haha"}]
-    ;(println "instaparsed content:")
-    (println content)
-    (println (unparse content))
+  (let [plugin      (get-plugin syntax-name)
+        parser      (:parser plugin)
+        content     (parser file-content)
+        get-content (partial get-nodes content)]
+    (println (get-content :variable))
+    (println (get-content :section))
     content))
   
 

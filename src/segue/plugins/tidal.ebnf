@@ -40,8 +40,9 @@ indent = #"\n +"
     | "(" <blank> exp (<space> exp)* <blank> ")"
     | operator
 
-integer = #'[0-9]+'
-float = #'[0-9]+.[0-9]+'
+<integer> = #'[0-9]+'
+<float> = #'[0-9]+.[0-9]+'
+<string> = #"\"[^\"]*\""
 
 operator = #"\B(\+|\-|\/|\*|\=|\<|\>|\.|\#|\$|\^|\&|\!|\%|\~|\|)+\B"
 
@@ -56,7 +57,5 @@ name = #'\w+'
 value = exp
 <word> = #"(?!(let|do|--|[0-9]))\b\w+" <space>*
 comma = ','
-space = #'\s'*
-
-string = #"\"[^\"]*\""
+<space> = #'\s'*
 

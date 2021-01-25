@@ -36,6 +36,9 @@
   [plugin-name]
   (->> plugin-name keyword (get plugins)))
 
+(defn get-nodes
+  [tree tag]
+  (->> tree (tree-seq next rest) (filter #(= tag (first %)))))
 
 (def unparse
   "Generates a string from a parsed content tree
