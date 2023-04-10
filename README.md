@@ -2,6 +2,10 @@
 
 A LiveCoding Session Manager.
 
+## ARCHIVED
+
+Seg has been archived in favor of its GUI counterpart, [verso](https://github.com/ghalestrilo/verso). So far, verso has been much more usable and a lot easier to develop.
+
 ## ⚠️ Work in Progress ⚠️
 (very early development)
 
